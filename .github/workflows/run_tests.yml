@@ -1,9 +1,24 @@
 name: Playwright Tests
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select Environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+        - dev
+      custom_url:
+        description: 'Or enter custom URL (optional)'
+        required: false
+        type: string
 
 jobs:
   test:
@@ -15,14 +30,17 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Install Playwright Browsers
-      run: playwright install --with-deps chromium
+        pip install pytest-playwright
+        playwright install --with-deps chromium
 
     - name: Run Playwright tests
-      run: pytest test_simple.py
+      env:
+        BASE_URL: ${{ github.event.inputs.custom_url || 
+                     (github.event.inputs.environment == 'production' && 'https://orthazone.com') ||
+                     (github.event.inputs.environment == 'staging' && 'https://staging.orthazone.com') ||
+                     'https://dev.orthazone.com' }}
+      run: pytest test_simple.py -s
