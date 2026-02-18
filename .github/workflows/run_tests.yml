@@ -50,4 +50,4 @@ jobs:
                      (github.event.inputs.environment == 'stage4' && 'https://stage4.dentazone.com/') ||
                      (github.event.inputs.environment == 'stage5' && 'https://stage5.dentazone.com/') ||
                      'https://orthazone.com' }}
-      run: pytest test_simple.py -s
+      run: pytest tests/ -s
