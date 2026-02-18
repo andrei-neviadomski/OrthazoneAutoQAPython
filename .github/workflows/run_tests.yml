@@ -13,8 +13,11 @@ on:
         type: choice
         options:
         - production
-        - staging
-        - dev
+        - stag1
+        - stag2
+        - stag3
+        - stag4
+        - stag5
       custom_url:
         description: 'Or enter custom URL (optional)'
         required: false
