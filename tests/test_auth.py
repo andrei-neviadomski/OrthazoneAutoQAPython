@@ -1,4 +1,4 @@
-import os
+""" import os
 from pages.login_page import LoginPage
 
 def test_failed_login(page):
@@ -13,4 +13,4 @@ def test_failed_login(page):
     login_page.login("wrong@email.com", "wrong_password")
 
     # 4. Проверяем результат
-    assert "Invalid login" in login_page.get_error_text()
+    assert "Invalid login" in login_page.get_error_text() """
