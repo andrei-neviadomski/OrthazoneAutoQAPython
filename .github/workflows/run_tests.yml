@@ -13,11 +13,11 @@ on:
         type: choice
         options:
         - production
-        - stag1
-        - stag2
-        - stag3
-        - stag4
-        - stag5
+        - stage1
+        - stage2
+        - stage3
+        - stage4
+        - stage5
       custom_url:
         description: 'Or enter custom URL (optional)'
         required: false
@@ -44,10 +44,10 @@ jobs:
       env:
         BASE_URL: ${{ github.event.inputs.custom_url || 
                      (github.event.inputs.environment == 'production' && 'https://orthazone.com') ||
-                     (github.event.inputs.environment == 'stag1' && 'https://stage1.dentazone.com/') ||
-                     (github.event.inputs.environment == 'stag2' && 'https://stage2.dentazone.com/') ||
-                     (github.event.inputs.environment == 'stag3' && 'https://stage3.dentazone.com/') ||
-                     (github.event.inputs.environment == 'stag4' && 'https://stage4.dentazone.com/') ||
-                     (github.event.inputs.environment == 'stag5' && 'https://stage5.dentazone.com/') ||
+                     (github.event.inputs.environment == 'stage1' && 'https://stage1.dentazone.com/') ||
+                     (github.event.inputs.environment == 'stage2' && 'https://stage2.dentazone.com/') ||
+                     (github.event.inputs.environment == 'stage3' && 'https://stage3.dentazone.com/') ||
+                     (github.event.inputs.environment == 'stage4' && 'https://stage4.dentazone.com/') ||
+                     (github.event.inputs.environment == 'stage5' && 'https://stage5.dentazone.com/') ||
                      'https://orthazone.com' }}
       run: pytest test_simple.py -s
