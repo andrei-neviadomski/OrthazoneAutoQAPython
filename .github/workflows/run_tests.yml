@@ -41,6 +41,10 @@ jobs:
       env:
         BASE_URL: ${{ github.event.inputs.custom_url || 
                      (github.event.inputs.environment == 'production' && 'https://orthazone.com') ||
-                     (github.event.inputs.environment == 'staging' && 'https://staging.orthazone.com') ||
-                     'https://dev.orthazone.com' }}
+                     (github.event.inputs.environment == 'stag1' && 'https://stage1.dentazone.com/') ||
+                     (github.event.inputs.environment == 'stag2' && 'https://stage2.dentazone.com/') ||
+                     (github.event.inputs.environment == 'stag3' && 'https://stage3.dentazone.com/') ||
+                     (github.event.inputs.environment == 'stag4' && 'https://stage4.dentazone.com/') ||
+                     (github.event.inputs.environment == 'stag5' && 'https://stage5.dentazone.com/') ||
+                     'https://orthazone.com' }}
       run: pytest test_simple.py -s
