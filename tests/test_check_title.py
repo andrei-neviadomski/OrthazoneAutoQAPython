@@ -11,3 +11,5 @@ def test_example_site(page):
     # 3. Используем методы класса
     home_page.open(base_url)
     home_page.check_title()
+    home_page.header.open_cart_popup()
+    #home_page.take_screenshot("screen")
