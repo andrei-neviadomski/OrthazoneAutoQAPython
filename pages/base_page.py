@@ -32,5 +32,5 @@ class BasePage:
         file_path = f"screenshots/{name}_{timestamp}.png"
         
         # 3. Делаем скриншот через Playwright
-        self.page.screenshot(path=file_path)
+        self.page.screenshot(path=file_path, full_page=True)
         return file_path
