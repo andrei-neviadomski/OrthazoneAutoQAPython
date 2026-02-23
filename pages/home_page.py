@@ -9,7 +9,12 @@ class HomePage(BasePage):
 
     # Выносим ожидаемый заголовок в константу
     EXPECTED_TITLE = "Orthodontic Supplies Store, Orthodontic Products & Instruments at Orthazone"
+    BRACKET_SYSTEM_BUTTON = 'span:has-text("Bracket Systems")'
 
     def check_title(self):
         # Используем встроенный expect от Playwright для проверки
         expect(self.page).to_have_title(self.EXPECTED_TITLE)
+
+    def click_category_by_name (self, name: str):
+        #self.click(self.BRACKET_SYSTEM_BUTTON)
+        self.click(f"span:has-text('{name}')")
