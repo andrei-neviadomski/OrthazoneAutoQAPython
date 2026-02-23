@@ -3,7 +3,7 @@ from pages.home_page import HomePage
 from pages.category_page import CategoryPage
 from pages.product_page import ProductPage
 from components.header import Header
-from components.checkout_pop_up import CheckoutPopUp
+from components.checkout_popup import CheckoutPopUp
 
 
 def test_add_product_to_cart(page):
@@ -34,7 +34,7 @@ def test_add_product_to_cart(page):
     home_page.take_screenshot("BRACKET_SYSTEM")
 
 
-def test_add_and_remove_product_in_cart_popup(page):
+def test_remove_product_from_cart_popup(page):
     home_page = HomePage(page)
     category_page = CategoryPage(page)
     product_page = ProductPage(page)
