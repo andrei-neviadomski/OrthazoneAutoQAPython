@@ -5,7 +5,7 @@ class CheckoutPopUp(BasePage):
     
     def verify_adding_product_by_name(self, name: str):
         product_title = self.page.locator(".line-clamp-2").first
-        expect(product_title).to_have_text("{name}", timeout=20000)
+        expect(product_title).to_have_text(f"{name}", timeout=20000)
 
     def remove_product_from_popup(self):
         remove_button = self.page.locator("button.y-basket-card__remove").first
