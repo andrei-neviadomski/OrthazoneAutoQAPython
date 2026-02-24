@@ -6,7 +6,7 @@ from components.header import Header
 from components.checkout_popup import CheckoutPopUp
 
 
-def test_add_product_to_cart(page):
+def test_add_product_to_cart_popup(page):
     home_page = HomePage(page)
     category_page = CategoryPage(page)
     product_page = ProductPage(page)
@@ -30,9 +30,6 @@ def test_add_product_to_cart(page):
 
     header.open_cart_popup()
     checkout_pop_up.verify_adding_product_by_name("Metal Brackets - Mini Size")
-
-    home_page.take_screenshot("BRACKET_SYSTEM")
-
 
 def test_remove_product_from_cart_popup(page):
     home_page = HomePage(page)
@@ -60,5 +57,3 @@ def test_remove_product_from_cart_popup(page):
     checkout_pop_up.verify_adding_product_by_name("Metal Brackets - Mini Size")
     checkout_pop_up.remove_product_from_popup()
     checkout_pop_up.verify_product_removed_from_popup()
-
-    home_page.take_screenshot("BRACKET_SYSTEM_REMOVE")
