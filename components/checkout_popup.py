@@ -3,12 +3,13 @@ from playwright.sync_api import expect
 
 class CheckoutPopUp(BasePage):
     
-    def verify_adding_product_by_name(self):
-        assert self.get_text(".line-clamp-2") == "Metal Brackets - Mini Size"
+    def verify_adding_product_by_name(self, name: str):
+        product_title = self.page.locator(".line-clamp-2").first
+        expect(product_title).to_have_text(f"{name}", timeout=20000)
 
     def remove_product_from_popup(self):
         remove_button = self.page.locator("button.y-basket-card__remove").first
-        remove_button.wait_for(state="visible", timeout=10000)
+        remove_button.wait_for(state="visible", timeout=20000)
         remove_button.click()
 
     def verify_product_removed_from_popup(self):
