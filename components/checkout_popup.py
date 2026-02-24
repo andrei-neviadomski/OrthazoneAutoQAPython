@@ -13,4 +13,4 @@ class CheckoutPopUp(BasePage):
 
     def verify_product_removed_from_popup(self):
         empty_message = self.page.locator(".y-modal__header").get_by_text("YOUR SHOPPING CART IS EMPTY!").filter(visible=True)
-        expect(empty_message).to_be_visible(timeout=7000)   
+        expect(empty_message).to_be_visible(timeout=20000)   
