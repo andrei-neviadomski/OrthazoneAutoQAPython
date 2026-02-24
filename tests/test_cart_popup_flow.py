@@ -29,7 +29,7 @@ def test_add_product_to_cart(page):
     product_page.click_add_to_cart_button()
 
     header.open_cart_popup()
-    checkout_pop_up.verify_adding_product_by_name()
+    checkout_pop_up.verify_adding_product_by_name("Metal Brackets - Mini Size")
 
     home_page.take_screenshot("BRACKET_SYSTEM")
 
@@ -57,7 +57,7 @@ def test_remove_product_from_cart_popup(page):
     product_page.click_add_to_cart_button()
 
     header.open_cart_popup()
-    checkout_pop_up.verify_adding_product_by_name()
+    checkout_pop_up.verify_adding_product_by_name("Metal Brackets - Mini Size")
     checkout_pop_up.remove_product_from_popup()
     checkout_pop_up.verify_product_removed_from_popup()
 
