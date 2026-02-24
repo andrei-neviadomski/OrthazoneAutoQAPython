@@ -50,4 +50,12 @@ jobs:
                      (github.event.inputs.environment == 'stage4' && 'https://stage4.dentazone.com/') ||
                      (github.event.inputs.environment == 'stage5' && 'https://stage5.dentazone.com/') ||
                      'https://orthazone.com' }}
-      run: pytest tests/ -s
+      run: pytest tests/ -s --screenshot on --output=test-results
+
+    - name: Upload Screenshots
+      if: always() # Сохранит результаты даже если тесты упали
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-results
+        path: test-results/
+        retention-days: 7
