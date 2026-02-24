@@ -8,8 +8,9 @@ class CheckoutPopUp(BasePage):
 
     def remove_product_from_popup(self):
         remove_button = self.page.locator("button.y-basket-card__remove").first
+        remove_button.wait_for(state="visible", timeout=10000)
         remove_button.click()
 
     def verify_product_removed_from_popup(self):
-        cart_items = self.page.locator(".y-modal__inner .line-clamp-2")
-        expect(cart_items).to_have_count(0)   
+        empty_message = self.page.locator(".y-modal__header").get_by_text("YOUR SHOPPING CART IS EMPTY!").filter(visible=True)
+        expect(empty_message).to_be_visible(timeout=7000)   
