@@ -16,5 +16,6 @@ class HomePage(BasePage):
         expect(self.page).to_have_title(self.EXPECTED_TITLE)
 
     def click_category_by_name (self, name: str):
-        #self.click(self.BRACKET_SYSTEM_BUTTON)
-        self.click(f"span:has-text('{name}')")
+        category_locator = self.page.locator(f"span.catagory-wrap__item--name:has-text('{name}')")
+        category_locator.wait_for(state="visible", timeout=20000)
+        category_locator.click()
