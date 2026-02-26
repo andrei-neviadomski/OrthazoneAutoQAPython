@@ -13,9 +13,14 @@ class ProductPage(BasePage):
 
     def click_add_to_cart_button(self):
         with self.page.expect_response(
-            lambda r: "checkout/cart/add" in r.url and r.status == 200
-        ) as response_info:
-            self.click("a:has-text('Add to Cart')")
-        
-        body = response_info.value.json()
+            lambda r: "checkout/cart/add" in r.url and r.status == 200,
+            timeout=30000
+        ) as cart_add_response:
+            with self.page.expect_response(
+                lambda r: "route=module/cart" in r.url and r.status == 200,
+                timeout=30000
+            ):
+                self.click("a:has-text('Add to Cart')")
+
+        body = cart_add_response.value.json()
         assert "success" in body, f"Add to Cart failed. Server response: {body}"
