@@ -2,17 +2,6 @@ import pytest
 import os
 from datetime import datetime
 
-
-@pytest.fixture(scope="function")
-def page(page):
-    """Инжектим заглушку gtag чтобы onclick не падал на stage"""
-    page.add_init_script("""
-        window.gtag = window.gtag || function() {};
-        window.dataLayer = window.dataLayer || [];
-    """)
-    yield page
-
-
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     # Этот блок выполняется после каждого этапа теста (setup, call, teardown)
