@@ -15,7 +15,7 @@ def test_check_login_logout(page):
     
     login_page = LoginPage(page)
 
-    login_page.login("autotest-old@orthazone.com", "123456789")
+    login_page.add_creds_and_login()
     
     home_page = HomePage(page)
 
