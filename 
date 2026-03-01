@@ -1,0 +1,12 @@
+  feat/add-basepage-and-loginpage-classes[m
+  feat/add-components-header-footer-leftmenu[m
+  feat/add-test-checkout-page[m
+  feat/add_test_adding_product_to_cart[m
+  feat/add_test_login_logout[m
+  feat/env-selection[m
+  feat/env-selection-v2[m
+  fix/change-devsites-in-run-tests-yml[m
+  fix/issue-in-github-action[m
+  fix/rename-test[m
+* [32mmain[m
+  test1[m
