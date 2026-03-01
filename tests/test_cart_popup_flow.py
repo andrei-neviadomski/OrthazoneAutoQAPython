@@ -1,3 +1,4 @@
+"""Test Suite for the checkout flow"""
 import os
 from pages.home_page import HomePage
 from pages.category_page import CategoryPage
@@ -7,6 +8,8 @@ from components.checkout_popup import CheckoutPopUp
 
 
 def test_add_product_to_cart_popup(page):
+    """Test checks addin a product to the cart"""
+
     home_page = HomePage(page)
     category_page = CategoryPage(page)
     product_page = ProductPage(page)
@@ -19,7 +22,9 @@ def test_add_product_to_cart_popup(page):
     home_page.check_title()
 
     home_page.click_category_by_name("Bracket Systems")
-    category_page.click_category_by_name("Metal Brackets (Standard, Mini, Self-Ligating, Vertical Slot)")
+    category_page.click_category_by_name(
+        "Metal Brackets (Standard, Mini, Self-Ligating, Vertical Slot)"
+        )
     category_page.click_category_by_name("Metal Brackets - Mini Size")
     category_page.click_product_by_name("Metal Brackets - Mini")
 
@@ -32,6 +37,8 @@ def test_add_product_to_cart_popup(page):
     checkout_pop_up.verify_adding_product_by_name("Metal Brackets - Mini Size")
 
 def test_remove_product_from_cart_popup(page):
+    """Test checks removingn a product from the cart"""
+
     home_page = HomePage(page)
     category_page = CategoryPage(page)
     product_page = ProductPage(page)
@@ -44,7 +51,9 @@ def test_remove_product_from_cart_popup(page):
     home_page.check_title()
 
     home_page.click_category_by_name("Bracket Systems")
-    category_page.click_category_by_name("Metal Brackets (Standard, Mini, Self-Ligating, Vertical Slot)")
+    category_page.click_category_by_name(
+        "Metal Brackets (Standard, Mini, Self-Ligating, Vertical Slot)"
+        )
     category_page.click_category_by_name("Metal Brackets - Mini Size")
     category_page.click_product_by_name("Metal Brackets - Mini")
 
