@@ -55,7 +55,7 @@ jobs:
 
     - name: Upload Artifacts on Failure
       # Этот шаг выполнится ТОЛЬКО если предыдущий (Run tests) завершился ошибкой
-      if: failure() 
+      if: always() 
       uses: actions/upload-artifact@v4
       with:
         name: playwright-failure-artifacts
