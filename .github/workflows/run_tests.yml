@@ -51,7 +51,7 @@ jobs:
                       (github.event.inputs.environment == 'stage5' && 'https://stage5.dentazone.com') ||
                       'https://orthazone.com' }}
       # Изменяем флаги: скриншоты и трейсинг только при падении
-      run: pytest tests/ -s --screenshot only-on-failure --tracing retain-on-failure --output=test-results
+      run: pytest tests/ -s --screenshot only-on-failure --tracing on --output=test-results
 
     - name: Upload Artifacts on Failure
       # Этот шаг выполнится ТОЛЬКО если предыдущий (Run tests) завершился ошибкой
