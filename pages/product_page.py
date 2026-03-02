@@ -8,5 +8,8 @@ class ProductPage(BasePage):
 
     def click_add_to_cart_button(self):
         self.click("a:has-text('Add to Cart')")
-        cart_counter = self.page.locator(".int-cart-text-indicator").filter(visible=True).first
-        expect(cart_counter).not_to_have_text("0", timeout=15000)
+        cart_counter = self.page.locator(
+            ".int-header-wrap button.int-cart-button .int-cart-text-indicator"
+            ).filter(visible=True).first
+        cart_counter.wait_for(state="visible", timeout=15000)
+        expect(cart_counter).to_have_text("1", timeout=15000)
