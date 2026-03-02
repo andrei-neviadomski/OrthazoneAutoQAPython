@@ -7,10 +7,9 @@ class HomePage(BasePage):
     """Home page"""
 
     def __init__(self, page):
-        super().__init__(page)  # Передаем управление в BasePage
-        self.header = Header(page) # Создаем объект хедера
+        super().__init__(page)
+        self.header = Header(page)
 
-    # Выносим ожидаемый заголовок в константу
     EXPECTED_TITLE = "Orthodontic Supplies Store, Orthodontic Products & Instruments at Orthazone"
     BRACKET_SYSTEM_BUTTON = 'span:has-text("Bracket Systems")'
 
