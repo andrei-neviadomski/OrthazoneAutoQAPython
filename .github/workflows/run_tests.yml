@@ -50,6 +50,10 @@ jobs:
                       (github.event.inputs.environment == 'stage4' && 'https://stage4.dentazone.com') ||
                       (github.event.inputs.environment == 'stage5' && 'https://stage5.dentazone.com') ||
                       'https://orthazone.com' }}
+        ADMIN_USERNAME: ${{ vars.ADMIN_USERNAME }}
+        ADMIN_PASSWORD: ${{ vars.ADMIN_PASSWORD }}
+        ADMIN_TEST_EMAIL: ${{ vars.ADMIN_TEST_EMAIL }}
+        ADMIN_TEST_PASWORD: ${{ vars.ADMIN_TEST_PASWORD }}
       # Изменяем флаги: скриншоты и трейсинг только при падении
       run: pytest tests/ -s --screenshot only-on-failure --tracing retain-on-failure --output=test-results
 
