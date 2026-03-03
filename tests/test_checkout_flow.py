@@ -8,9 +8,9 @@ from pages.product_page import ProductPage
 from pages.checkout_page import CheckoutPage
 from pages.checkout_success_page import CheckoutSuccessPage
 
-def test_checkout_flow(page, setup_base_test):
+def test_checkout_flow(page, setup_order_test):
     """Test of the checkout."""
-    home_page = setup_base_test
+    home_page = setup_order_test
     category_page = CategoryPage(page)
     product_page = ProductPage(page)
     header = Header(page)

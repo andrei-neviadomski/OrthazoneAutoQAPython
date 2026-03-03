@@ -1,5 +1,4 @@
 """Test Suite for the checkout flow"""
-
 from pages.category_page import CategoryPage
 from pages.product_page import ProductPage
 from components.header import Header
