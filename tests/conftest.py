@@ -56,10 +56,10 @@ def setup_order_test(page, context):
     admin_login_page.page.on("dialog", lambda dialog: dialog.accept())
 
     while True:
-        rows = admin_login_page.page.locator("table.list tbody tr:not(.filter)")
-        if rows.count() == 0:
+        if admin_login_page.page.locator('input[name="selected[]"]').count() == 0:
             break
-        cell = rows.first.locator("td:nth-child(6)")
+        cell = admin_login_page.page.locator(
+            "table.list tbody tr:not(.filter) td:nth-child(6)").first
         if cell.inner_text() == os.getenv("ADMIN_TEST_EMAIL"):
             admin_login_page.page.locator('input[name="selected[]"]').first.click()
             admin_login_page.click("a.button:has-text('Delete')")
