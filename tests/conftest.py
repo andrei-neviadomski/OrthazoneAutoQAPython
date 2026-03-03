@@ -25,7 +25,7 @@ def pytest_runtest_makereport(item, call):
 def setup_base_test(page, context):
     """Setup fixtures for tests"""
     home_page = HomePage(page)
-    base_url = os.getenv("BASE_URL", "https://orthazone.com")
+    base_url = os.getenv("BASE_URL", "https://orthazone.com/")
     home_page.open(base_url)
     home_page.check_title()
 
