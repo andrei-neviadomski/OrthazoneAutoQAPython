@@ -16,3 +16,6 @@ screenshots/
 # IDE
 .vscode/
 .idea/
+
+
+.env

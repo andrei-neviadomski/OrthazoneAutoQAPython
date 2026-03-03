@@ -1,5 +1,8 @@
 """Login button"""
+import os
+from dotenv import load_dotenv
 from .base_page import BasePage
+load_dotenv()
 
 
 class LoginPage(BasePage):
@@ -10,6 +13,6 @@ class LoginPage(BasePage):
 
     def add_creds_and_login(self):
         """add creds and login"""
-        self.fill(self.EMAIL_INPUT, "autotest-old@orthazone.com")
-        self.fill(self.PASSWORD_INPUT, "123456789")
+        self.fill(self.EMAIL_INPUT, os.getenv("ADMIN_TEST_EMAIL"))
+        self.fill(self.PASSWORD_INPUT, os.getenv("ADMIN_TEST_PASWORD"))
         self.click(self.LOGIN_SUBMIT_BUTTON)

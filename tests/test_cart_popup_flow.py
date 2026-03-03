@@ -1,25 +1,18 @@
 """Test Suite for the checkout flow"""
-import os
-from pages.home_page import HomePage
 from pages.category_page import CategoryPage
 from pages.product_page import ProductPage
 from components.header import Header
 from components.checkout_popup import CheckoutPopUp
 
 
-def test_add_product_to_cart_popup(page):
+def test_add_product_to_cart_popup(page, setup_base_test):
     """Test checks addin a product to the cart"""
 
-    home_page = HomePage(page)
+    home_page = setup_base_test
     category_page = CategoryPage(page)
     product_page = ProductPage(page)
     header = Header(page)
     checkout_pop_up = CheckoutPopUp(page)
-
-    base_url = os.getenv("BASE_URL", "https://orthazone.com")
-
-    home_page.open(base_url)
-    home_page.check_title()
 
     home_page.click_category_by_name("Bracket Systems")
     category_page.click_category_by_name(
@@ -36,19 +29,14 @@ def test_add_product_to_cart_popup(page):
     header.open_cart_popup()
     checkout_pop_up.verify_adding_product_by_name("Metal Brackets - Mini Size")
 
-def test_remove_product_from_cart_popup(page):
+def test_remove_product_from_cart_popup(page, setup_base_test):
     """Test checks removingn a product from the cart"""
 
-    home_page = HomePage(page)
+    home_page = setup_base_test
     category_page = CategoryPage(page)
     product_page = ProductPage(page)
     header = Header(page)
     checkout_pop_up = CheckoutPopUp(page)
-
-    base_url = os.getenv("BASE_URL", "https://orthazone.com")
-
-    home_page.open(base_url)
-    home_page.check_title()
 
     home_page.click_category_by_name("Bracket Systems")
     category_page.click_category_by_name(

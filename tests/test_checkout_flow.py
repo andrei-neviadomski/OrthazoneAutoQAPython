@@ -1,18 +1,16 @@
 """Test sutes for orthazone checkout."""
 
-import os
 from components.header import Header
 from components.checkout_popup import CheckoutPopUp
 from pages.login_page import LoginPage
-from pages.home_page import HomePage
 from pages.category_page import CategoryPage
 from pages.product_page import ProductPage
 from pages.checkout_page import CheckoutPage
 from pages.checkout_success_page import CheckoutSuccessPage
 
-def test_checkout_flow(page):
+def test_checkout_flow(page, setup_order_test):
     """Test of the checkout."""
-    home_page = HomePage(page)
+    home_page = setup_order_test
     category_page = CategoryPage(page)
     product_page = ProductPage(page)
     header = Header(page)
@@ -21,10 +19,6 @@ def test_checkout_flow(page):
     checkout_page = CheckoutPage (page)
     checkout_success_page = CheckoutSuccessPage(page)
 
-    base_url = os.getenv("BASE_URL", "https://orthazone.com")
-
-    home_page.open(base_url)
-    home_page.check_title()
     home_page.set_stripe_cookie()
 
     home_page.header.click_account_button()
