@@ -3,8 +3,11 @@ from datetime import datetime
 import os
 from playwright.sync_api import Error as PlaywrightError
 import pytest
+from dotenv import load_dotenv
 from pages.home_page import HomePage
 from admin.admin_login_page import AdminLoginPage
+
+load_dotenv()
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -41,13 +44,13 @@ def setup_order_test(page, context):
     admin_login_page = AdminLoginPage(page)
     base_admin_url = base_url +"admin/"
     admin_login_page.open(base_admin_url)
-    admin_login_page.fill('[name="username"]', "andrein")
-    admin_login_page.fill('[name="password"]', "X9rAQH8s")
+    admin_login_page.fill('[name="username"]', os.getenv("ADMIN_USERNAME"))
+    admin_login_page.fill('[name="password"]', os.getenv("ADMIN_PASSWORD"))
     admin_login_page.click('a.button')
 
     admin_login_page.click("a.top:has-text('Sales')")
     admin_login_page.click('a[href*="sale/order"]')
-    admin_login_page.fill("[name='filter_customer_email']", "autotest-old@orthazone.com")
+    admin_login_page.fill("[name='filter_customer_email']", os.getenv("ADMIN_TEST_EMAIL"))
     admin_login_page.click("a.button:has-text('Filter')")
 
 
