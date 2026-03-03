@@ -9,6 +9,7 @@ class ProductPage(BasePage):
 
     def click_add_to_cart_button(self):
         self.click("a:has-text('Add to Cart')")
+        self.page.evaluate("window.scrollTo(0, 0)")
         desktop = self.page.locator(
         ".int-header-wrap button.int-cart-button .int-cart-text-indicator"
         )
