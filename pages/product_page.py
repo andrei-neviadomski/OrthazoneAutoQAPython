@@ -17,4 +17,4 @@ class ProductPage(BasePage):
         ".y-header-mobile button.int-cart-button .int-cart-text-indicator"
         )
         cart_counter = desktop if desktop.first.is_visible() else mobile
-        expect(cart_counter.first).not_to_have_text("0", timeout=15000)
+        expect(cart_counter.first).to_have_text(re.compile(r"^[1-9]\d*$"), timeout=15000)
