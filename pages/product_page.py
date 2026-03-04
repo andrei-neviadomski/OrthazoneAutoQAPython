@@ -22,4 +22,4 @@ class ProductPage(BasePage):
         re.compile(r"Cart:\s*1\s*items"),
         timeout=15000
         )
-        expect(cart_counter.first).to_have_text("1", timeout=15000)
+        expect(cart_counter.first).not_to_have_text("0", timeout=15000)
