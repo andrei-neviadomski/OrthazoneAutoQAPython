@@ -54,6 +54,7 @@ jobs:
         ADMIN_USERNAME: ${{ vars.ADMIN_USERNAME }}
         ADMIN_PASSWORD: ${{ vars.ADMIN_PASSWORD }}
         ADMIN_TEST_EMAIL: ${{ vars.ADMIN_TEST_EMAIL }}
+        ADMIN_NEW_EMAIL: ${{ vars.ADMIN_NEW_EMAIL }}
         ADMIN_TEST_PASWORD: ${{ vars.ADMIN_TEST_PASWORD }}
       # Изменяем флаги: скриншоты и трейсинг только при падении
       run: pytest tests/ -s --screenshot only-on-failure --tracing retain-on-failure --output=test-results
