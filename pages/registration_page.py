@@ -33,9 +33,10 @@ class RegistrationPage(BasePage):
     def check_business_account(self):
         """Choose registration of Business account"""
         self.click('label[for="registration_type_id_2"]')
+        expect(self.page.locator('#registration_type_id_2')).to_be_checked()
 
     def click_next_batton(self):
         """Click the next batton"""
         self.page.locator('button[data-step-btn="next"]').scroll_into_view_if_needed()
         self.click('button[data-step-btn="next"]')
-        time.sleep(10)
+        time.sleep(5)
