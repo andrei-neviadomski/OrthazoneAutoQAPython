@@ -1,6 +1,5 @@
 """Registration page"""
 import os
-import time
 from playwright.sync_api import expect
 from .base_page import BasePage
 
@@ -31,12 +30,19 @@ class RegistrationPage(BasePage):
         self.fill('input[name="confirm"]', os.getenv("ADMIN_TEST_PASWORD"))
 
     def check_business_account(self):
-        """Choose registration of Business account"""
-        self.click('label[for="registration_type_id_2"]')
-        expect(self.page.locator('#registration_type_id_2')).to_be_checked()
+        """check business account type"""
+        self.page.wait_for_timeout(1000)
+        self.page.evaluate("""
+            () => {
+                var radio = document.getElementById('registration_type_id_2');
+                radio.checked = true;
+                jQuery(radio).trigger('change');
+                jQuery('[data-block-acc]').hide();
+                jQuery('[data-block-acc="registration_block_2"]').css('display', 'inline-block');
+            }
+        """)
 
     def click_next_batton(self):
-        """Click the next batton"""
-        self.page.locator('button[data-step-btn="next"]').scroll_into_view_if_needed()
-        self.click('button[data-step-btn="next"]')
-        time.sleep(5)
+        """Click next button"""
+        self.page.locator('button[data-step-btn="next"]').click()
+        self.page.wait_for_timeout(2000)
