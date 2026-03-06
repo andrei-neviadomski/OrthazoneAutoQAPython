@@ -23,3 +23,12 @@ def test_cart_counter(page, setup_base_test):
     product_page.select_option_value_by_name("Maxillary Right Canine (UR3)")
     product_page.click_add_to_cart_button()
     header.verify_working_cart_counter()
+
+def test_search_popup(page, setup_base_test):
+    """Test the search pop-up in the header"""
+
+    _ = setup_base_test
+    header = Header(page)
+
+    header.input_data_search_field("12355")
+    header.verify_search_popup("Articulating Paper 200 micron Strips Plastic Box Blue 300/Pk")
