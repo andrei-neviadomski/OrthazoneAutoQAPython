@@ -13,7 +13,7 @@ class Header(BasePage):
     LOGOUT_BUTTON = 'span:has-text("Logout")'
     REGISTER_BUTTON = 'span:has-text("Register")'
 
-    def open_cart_popup(self):
+    def click_cart_popup_button(self):
         """Open the cart popup"""
         self.click(self.CART_BUTTON)
         assert self.get_text("div.y-modal__title") == "SHOPPING CART"
