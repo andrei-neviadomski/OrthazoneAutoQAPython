@@ -5,14 +5,15 @@ from pages.base_page import BasePage
 
 
 class Header(BasePage):
-    """Methodos for Header"""
+    """Component Header for all pages"""
 
     CART_BUTTON = 'button.int-cart-button.is_cart'
     ACCOUNT_BUTTON = 'span:has-text("Account")'
     LOGIN_BUTTON = 'span:has-text("Login")'
     LOGOUT_BUTTON = 'span:has-text("Logout")'
+    REGISTER_BUTTON = 'span:has-text("Register")'
 
-    def open_cart_popup(self):
+    def click_cart_popup_button(self):
         """Open the cart popup"""
         self.click(self.CART_BUTTON)
         assert self.get_text("div.y-modal__title") == "SHOPPING CART"
@@ -48,3 +49,7 @@ class Header(BasePage):
         """Verify a product in the search popup by name"""
         search_popup = self.page.locator("div.search_results_right").filter(visible=True).first
         expect(search_popup).to_contain_text(product_name, timeout=15000)
+
+    def click_register_button(self):
+        """Click the Register button in the header"""
+        self.click(self.REGISTER_BUTTON)

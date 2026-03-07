@@ -39,7 +39,7 @@ def test_checkout_flow(page, setup_order_test):
     product_page.select_option_value_by_name("Maxillary Right Canine (UR3)")
     product_page.click_add_to_cart_button()
 
-    header.open_cart_popup()
+    header.click_cart_popup_button()
     checkout_pop_up.verify_adding_product_by_name("Metal Brackets - Mini Size")
     checkout_pop_up.click_checkout_button()
     checkout_page.check_url()
