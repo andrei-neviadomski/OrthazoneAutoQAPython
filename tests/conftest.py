@@ -52,15 +52,32 @@ def setup_order_test(page, context):
     admin_login_page.click('a[href*="sale/order"]')
     admin_login_page.fill("[name='filter_customer_email']", os.getenv("ADMIN_TEST_EMAIL"))
     admin_login_page.click("a.button:has-text('Filter')")
-
     admin_login_page.page.on("dialog", lambda dialog: dialog.accept())
-
     while True:
         if admin_login_page.page.locator('input[name="selected[]"]').count() == 0:
             break
         cell = admin_login_page.page.locator(
             "table.list tbody tr:not(.filter) td:nth-child(6)").first
         if cell.inner_text() == os.getenv("ADMIN_TEST_EMAIL"):
+            admin_login_page.page.locator('input[name="selected[]"]').first.click()
+            admin_login_page.click("a.button:has-text('Delete')")
+        else:
+            break
+
+    admin_login_page.click("#sale > a.top")
+    admin_login_page.click("#sale a.parent:text('Customers')")
+    admin_login_page.click("a[href*='route=sale/customer&']")
+
+
+    admin_login_page.fill("[name='filter_email']", os.getenv("ADMIN_NEW_EMAIL"))
+    admin_login_page.click("a.button:has-text('Filter')")
+    admin_login_page.page.on("dialog", lambda dialog: dialog.accept())
+    while True:
+        if admin_login_page.page.locator('input[name="selected[]"]').count() == 0:
+            break
+        cell = admin_login_page.page.locator(
+            "table.list tbody tr:not(.filter) td:nth-child(4)").first
+        if cell.inner_text() == os.getenv("ADMIN_NEW_EMAIL"):
             admin_login_page.page.locator('input[name="selected[]"]').first.click()
             admin_login_page.click("a.button:has-text('Delete')")
         else:

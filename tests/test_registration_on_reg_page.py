@@ -28,6 +28,3 @@ def test_reg_on_reg_page(page, setup_order_test: HomePage):
     registration_page.check_agree_checkbox()
     registration_page.click_register_batton()
     registration_page.verify_registation()
-
-
-    registration_page.take_screenshot()
