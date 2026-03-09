@@ -17,9 +17,17 @@ def test_reg_on_reg_page(page, setup_order_test: HomePage):
     registration_page.fill_password()
     registration_page.fill_confirm_password()
     registration_page.check_business_account()
-
     registration_page.click_next_batton()
-    #registration_page.verify_business_block_visible()
+
+    registration_page.verify_business_acount()
+    registration_page.fill_first_name()
+    registration_page.fill_last_name()
+    registration_page.click_next_batton()
+
+    registration_page.verify_register_acount_step()
+    registration_page.check_agree_checkbox()
+    registration_page.click_register_batton()
+    registration_page.verify_registation()
 
 
     registration_page.take_screenshot()
