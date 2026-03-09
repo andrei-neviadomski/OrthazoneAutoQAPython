@@ -14,5 +14,5 @@ class LoginPage(BasePage):
     def add_creds_and_login(self):
         """add creds and login"""
         self.fill(self.EMAIL_INPUT, os.getenv("ADMIN_TEST_EMAIL"))
-        self.fill(self.PASSWORD_INPUT, os.getenv("ADMIN_TEST_PASWORD"))
+        self.fill(self.PASSWORD_INPUT, os.getenv("ADMIN_TEST_PASSWORD"))
         self.click(self.LOGIN_SUBMIT_BUTTON)
