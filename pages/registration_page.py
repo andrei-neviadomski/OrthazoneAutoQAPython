@@ -15,19 +15,31 @@ class RegistrationPage(BasePage):
 
     def fill_email(self):
         """fill email"""
-        self.fill('input[name="email"]', os.getenv("ADMIN_NEW_EMAIL"))
+        value = os.getenv("ADMIN_NEW_EMAIL")
+        locator = self.page.locator('input[name="email"]')
+        locator.click()
+        locator.press_sequentially(value, delay=50)
 
     def fill_phone(self):
         """fill phone"""
-        self.fill('input[name="telephone"]', "5656565656")
+        value = "5656565656"
+        locator = self.page.locator('input[name="telephone"]')
+        locator.click()
+        locator.press_sequentially(value, delay=50)
 
     def fill_password(self):
         """fill password"""
-        self.fill('input[name="password"]', os.getenv("ADMIN_TEST_PASWORD"))
+        value = os.getenv("ADMIN_TEST_PASSWORD")
+        locator = self.page.locator('input[name="password"]')
+        locator.click()
+        locator.press_sequentially(value, delay=50)
 
     def fill_confirm_password(self):
         """fill confirm password"""
-        self.fill('input[name="confirm"]', os.getenv("ADMIN_TEST_PASWORD"))
+        value = os.getenv("ADMIN_TEST_PASSWORD")
+        locator = self.page.locator('input[name="confirm"]')
+        locator.click()
+        locator.press_sequentially(value, delay=50)
 
     def check_business_account(self):
         """check business account type"""
@@ -46,3 +58,41 @@ class RegistrationPage(BasePage):
         """Click next button"""
         self.page.locator('button[data-step-btn="next"]').click()
         self.page.wait_for_timeout(2000)
+
+    def verify_business_acount(self):
+        """verify business account"""
+        locator = self.page.locator('input[name="company_name"]')
+        expect(locator).to_be_visible(timeout=20000)
+
+    def fill_first_name(self):
+        """fill first name field"""
+        value = "Auto test new"
+        locator = self.page.locator('input[name="firstname"]').filter(visible=True)
+        locator.click()
+        locator.press_sequentially(value, delay=50)
+
+    def fill_last_name(self):
+        """fill last name field"""
+        value = "Auto test new"
+        locator = self.page.locator('input[name="lastname"]').filter(visible=True)
+        locator.click()
+        locator.press_sequentially(value, delay=50)
+
+    def verify_register_acount_step(self):
+        """verify register acount_step"""
+        locator = self.page.locator('.aform__head').filter(visible=True)
+        expect(locator).to_have_text("Register Account")
+
+    def check_agree_checkbox(self):
+        """Check "I have read and agree to the Privacy Policy" checkbox"""
+        self.page.locator('label[for="agree"]').click()
+
+    def click_register_batton(self):
+        """Click register button"""
+        self.page.locator('button[data-step-btn="send"]').click()
+        self.page.wait_for_timeout(2000)
+
+    def verify_registation(self):
+        """verify finishing regitration"""
+        locator = self.page.locator('.asteps__head').filter(visible=True)
+        expect(locator).to_have_text("Your Account Has Been Created!")
