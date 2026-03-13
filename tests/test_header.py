@@ -1,4 +1,6 @@
 """Test Suite for Header"""
+from pages.login_page import LoginPage
+from pages.logout_page import LogoutPage
 from pages.category_page import CategoryPage
 from pages.product_page import ProductPage
 from components.header import Header
@@ -32,3 +34,17 @@ def test_search_popup(page, setup_base_test):
 
     header.input_data_search_field("12355")
     header.verify_search_popup("Articulating Paper 200 micron Strips Plastic Box Blue 300/Pk")
+
+def test_check_login_logout(page, setup_base_test):
+    """Test login and logout"""
+    home_page = setup_base_test
+    login_page = LoginPage(page)
+    logout_page = LogoutPage(page)
+
+    home_page.header.click_account_button()
+    home_page.header.click_login_button()
+    login_page.add_creds_and_login()
+    home_page.check_title()
+    home_page.header.click_account_button()
+    home_page.header.click_logout_button()
+    logout_page.check_title()
