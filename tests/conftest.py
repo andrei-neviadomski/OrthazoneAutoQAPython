@@ -5,6 +5,9 @@ from playwright.sync_api import Error as PlaywrightError
 import pytest
 from dotenv import load_dotenv
 from pages.home_page import HomePage
+from pages.login_page import LoginPage
+from pages.category_page import CategoryPage
+from pages.product_page import ProductPage
 from admin.admin_login_page import AdminLoginPage
 
 load_dotenv()
@@ -98,3 +101,70 @@ def setup_base_test(page, context):
         page.evaluate("localStorage.clear(); sessionStorage.clear();")
     except PlaywrightError as e:
         print(f"Error during clinning up: {e}")
+
+
+@pytest.fixture(scope="function")
+def setup_logged_in_test(page, context):
+    """Setup fixture for header tests that require an authenticated user.
+
+    Logs in using ADMIN_TEST_EMAIL / ADMIN_TEST_PASSWORD env vars.
+    Yields HomePage after successful login.
+    Clears cookies/storage on teardown.
+    """
+    home_page = HomePage(page)
+    base_url = os.getenv("BASE_URL", "https://orthazone.com/")
+    login_page = LoginPage(page)
+
+    home_page.open(base_url)
+    home_page.header.click_account_button()
+    home_page.header.click_login_button()
+    login_page.add_creds_and_login()
+    home_page.check_title()
+
+    yield home_page
+
+    try:
+        context.clear_cookies()
+        page.evaluate("localStorage.clear(); sessionStorage.clear();")
+    except PlaywrightError as e:
+        print(f"Error during cleanup: {e}")
+
+
+@pytest.fixture(scope="function")
+def setup_cart_with_product(page, context):
+    """Setup fixture for cart modal tests.
+
+    Opens homepage, navigates to Metal Brackets - Mini, adds one item
+    (MBT .018 / Hooks On 3 / Maxillary Right Canine UR3) to the cart.
+    Yields HomePage so tests can interact with the header immediately.
+    Clears cookies/storage on teardown.
+
+    Used by: test_cart010..test_cart014
+    """
+    home_page = HomePage(page)
+    base_url = os.getenv("BASE_URL", "https://orthazone.com/")
+    category_page = CategoryPage(page)
+    product_page = ProductPage(page)
+
+    home_page.open(base_url)
+    home_page.check_title()
+
+    home_page.click_category_by_name("Bracket Systems")
+    category_page.click_category_by_name(
+        "Metal Brackets (Standard, Mini, Self-Ligating, Vertical Slot)"
+    )
+    category_page.click_category_by_name("Metal Brackets - Mini Size")
+    category_page.click_product_by_name("Metal Brackets - Mini")
+
+    product_page.select_option_value_by_name("MBT .018")
+    product_page.select_option_value_by_name("Hooks On 3")
+    product_page.select_option_value_by_name("Maxillary Right Canine (UR3)")
+    product_page.click_add_to_cart_button()
+
+    yield home_page
+
+    try:
+        context.clear_cookies()
+        page.evaluate("localStorage.clear(); sessionStorage.clear();")
+    except PlaywrightError as e:
+        print(f"Error during cleanup: {e}")
