@@ -1,355 +1,423 @@
-# Context Document — Orthazone Header Tests
-**Purpose:** Single source of truth for writing and maintaining header tests.
-**Aligns with:** branch `feat/new-header-tests`, project `OrthazoneAutoQAPython`
+# Context Document — Orthazone
+**Purpose:** Single source of truth for writing and maintaining automated tests.
 
 ---
 
-## 1. Project Architecture
+## 1. Project Structure
 
 ```
 OrthazoneAutoQAPython/
 ├── admin/
-│   └── admin_login_page.py          ← AdminLoginPage (teardown helper)
+│   └── admin_login_page.py        ← Admin panel POM (used only in teardown)
 ├── components/
-│   ├── header.py                    ← Header component (ALL header logic lives here)
-│   └── checkout_popup.py            ← Cart modal logic
+│   ├── header.py                  ← Header component — all 6 header zones
+│   └── checkout_popup.py          ← Cart modal (add/remove product, checkout button)
 ├── pages/
-│   ├── base_page.py                 ← BasePage: open/click/fill/get_text/take_screenshot
-│   ├── home_page.py                 ← has self.header = Header(page)
-│   ├── login_page.py                ← add_creds_and_login()
-│   ├── logout_page.py               ← check_title()
-│   ├── category_page.py
-│   ├── product_page.py
-│   ├── cart_page.py
-│   ├── checkout_page.py
-│   ├── checkout_success_page.py
-│   └── registration_page.py
+│   ├── base_page.py               ← BasePage: open / click / fill / get_text / take_screenshot
+│   ├── home_page.py               ← HomePage: check_title, click_category_by_name, set_stripe_cookie
+│   │                                 Has self.header = Header(page)
+│   ├── login_page.py              ← add_creds_and_login()
+│   ├── logout_page.py             ← check_title()
+│   ├── category_page.py           ← click_category_by_name(), click_product_by_name()
+│   ├── product_page.py            ← select_option_value_by_name(), click_add_to_cart_button()
+│   ├── cart_page.py               ← (stub — select_option_value_by_name only)
+│   ├── checkout_page.py           ← Full checkout steps: delivery → address → coupon → payment → sign → submit
+│   ├── checkout_success_page.py   ← verify_checkout_success_page()
+│   └── registration_page.py       ← Multi-step registration: email → phone → password → business → name → submit
 ├── tests/
-│   ├── conftest.py                  ← fixtures: setup_base_test, setup_order_test
-│   ├── test_header.py               ← header test suite (extend here)
-│   ├── test_cart_popup_flow.py
-│   ├── test_checkout_flow.py
-│   └── test_registration_on_reg_page.py
-├── docs/
-│   ├── SPEC.md                      ← what to test
-│   └── CONTEXT.md                   ← this file
-├── .env.example
-└── requirements.txt
+│   ├── conftest.py                ← All pytest fixtures + failure screenshot hook
+│   ├── test_header.py             ← 42 header tests (all zones)
+│   ├── test_cart_popup_flow.py    ← 2 cart popup tests
+│   ├── test_checkout_flow.py      ← 1 checkout e2e test
+│   └── test_registration_on_reg_page.py  ← 1 registration e2e test
+├── .env.example                   ← Environment variable template
+├── requirements.txt               ← pytest-playwright, python-dotenv
+└── .github/workflows/run_tests.yml
 ```
 
 ### Key Architectural Rules
 
-1. **Single `Header` class** — all header logic lives in `components/header.py`.
-   Do NOT split into sub-components. Other files import `Header(page)` directly.
-
-2. **`BasePage` pattern** — all classes inherit `BasePage`.
-   Use `self.page` (not `self._page`). Helper methods: `self.click()`, `self.fill()`,
-   `self.get_text()`. For complex locators, use `self.page.locator(...)` directly.
-
-3. **No session-level auth caching** — tests that need a logged-in user
-   perform login inline using `login_page.add_creds_and_login()`, OR
-   use the `setup_logged_in_test` fixture (see Section 4).
-
-4. **Assertions** — use `expect()` inside component methods for auto-retry behavior.
-   Use plain `assert` for simple href/attribute checks in test body.
+1. **Single `Header` class** — all header logic lives in `components/header.py`. Other files import `Header(page)` directly. Do not split into sub-components.
+2. **`BasePage` pattern** — all classes inherit `BasePage`. Use `self.page` (not `self._page`). Wrappers: `self.click()`, `self.fill()`, `self.get_text()`. For complex locators, call `self.page.locator(...)` directly.
+3. **No session-level auth caching** — tests that need a logged-in user perform login inline, or use `setup_logged_in_test`.
+4. **Assertions** — use `expect()` inside component methods for auto-retry. Use plain `assert` for simple attribute/href checks in test bodies.
+5. **Deduplication pattern** — use `.filter(visible=True).first` for elements that appear in both desktop and mobile DOM. Use CSS class scoping for elements that also appear in the footer.
 
 ---
 
-## 2. Header DOM Structure (Desktop)
+## 2. Environment Variables
 
-```
-<header>
-  └── div.int-header-wrap                    ← desktop header root
-        ├── div.int-header-top               ← ZONE-1: Top bar
-        │     ├── div.int-header-top-customers
-        │     │     └── div.int-header-top-counter
-        │     │           └── span × 5       ← one span per digit
-        │     └── div.int-header-top-right
-        │           ├── a.int-header-top-right-link.is_current    ← Shopping+
-        │           ├── a[href*=drstorelist]                       ← Inventory (VIP)
-        │           ├── a[href*=drslider]                          ← Payment (VIP)
-        │           ├── a[href*=account/lab]                       ← Lab Tracker (VIP)
-        │           │     └── span.int-header-top-badge (×3)       ← "VIP" labels
-        │           └── div.int-header-top-right-account
-        │                 ├── button.int-account-button            ← click trigger
-        │                 │     └── div.int-account-button-text
-        │                 │           └── span:first-child          ← "Hi Name!" or "Hi"
-        │                 └── div.y-modal.is_user                  ← dropdown (desktop)
-        │                       ├── a[href*=account/account]       ← My Account (AUTH only)
-        │                       └── a[href*=account/logout]        ← Logout (AUTH only)
-        ├── div.int-header-left              ← ZONE-2: Logo
-        │     ├── p.int-header-left-serving  ← slogan
-        │     ├── a[href="/"] > img[alt="logo"]
-        │     └── div.secondary > img[alt="aao"]
-        ├── div.int-header-center            ← ZONE-3+4: Nav + Search
-        │     ├── div.int-header-center-top
-        │     │     ├── a[href="tel:800-833-7132"]
-        │     │     ├── a[href="/clearance"]
-        │     │     ├── a[href*=brands]
-        │     │     ├── a[href*=sampledashboard]
-        │     │     ├── a[href*=allorders]
-        │     │     └── a[href*=quickreorder]
-        │     └── div#search.int-header-search
-        │           ├── input.y-search__inp.int-header-search-input
-        │           ├── button.int-header-search-button
-        │           └── div.search_results_container  ← AJAX (injected on 3+ chars)
-        │                 ├── div.search_results_left
-        │                 │     └── div.search_results_searches
-        │                 └── div.search_results_right  ← product results
-        ├── div.int-header-right             ← ZONE-5: Wishlist + Cart
-        │     ├── a.int-wishlist-button[href*=wishlist]
-        │     │     └── span.int-wishlist-button-indicator
-        │     ├── button.int-cart-button.is_cart
-        │     │     └── span.int-cart-text-indicator[data-quantity]
-        │     └── div.y-modal.is_cart        ← cart modal (desktop)
-        │           ├── div.y-modal__title
-        │           ├── div.y-basket-card (×N)
-        │           ├── div.y-modal__cart-total
-        │           │     └── div.y-modal__cart-total--row (×3)
-        │           ├── a[href*=checkout/cart]   ← View Cart
-        │           └── a[href*=check-out]        ← Checkout
-        └── div.int-header-categories        ← ZONE-6: Category pills
-              ├── a[href*=general-dentistry]  ← Dental
-              ├── a[href*=surgical-and-implant] ← Surgery
-              └── a[href=""]                  ← Orthodontic (⚠ empty href!)
+```bash
+# .env (copy from .env.example, never commit)
+BASE_URL=https://orthazone.com/        # target environment
+
+ADMIN_USERNAME=                         # OpenCart admin panel username
+ADMIN_PASSWORD=                         # OpenCart admin panel password
+ADMIN_TEST_EMAIL=                       # test customer email (used for login in tests)
+ADMIN_TEST_PASSWORD=                    # test customer password
+ADMIN_NEW_EMAIL=                        # new email for registration tests (cleaned up after)
 ```
 
-**⚠ DUPLICATE ELEMENTS IN MOBILE DOM AND FOOTER**
-`div.y-header-mobile` (hidden at 1280px+) contains duplicate:
-- `button.int-cart-button.is_cart` — 2 in DOM
-- `div.y-modal.is_cart` — 2 in DOM
-- `button.int-account-button` — 2 in DOM
-- `input.y-search__inp` — 2 in DOM
-- VIP links (`drstorelist`, `drslider`, `account/lab`) — 2 in DOM each (desktop `int-header-top-right-link` + mobile `y-header-mobile__tabs-link`)
+---
 
-Additionally, these appear outside the header entirely:
-- `a[href="tel:800-833-7132"]` — **3 in DOM**: desktop header + mobile header + **footer**
-- `a[href*="/brands"]` — **2 in DOM**: desktop header + **footer** (`ftr-menu__link`)
+## 3. Fixtures
 
-**Two patterns used to handle duplicates (depending on element):**
+All fixtures are defined in `tests/conftest.py`.
+
+### `setup_base_test`
+
+```
+Scope:     function
+Auth:      ANON
+Setup:     Opens BASE_URL, verifies homepage title
+Teardown:  clear_cookies + localStorage.clear() + sessionStorage.clear()
+Yields:    HomePage
+Used by:   Most header tests, cart popup tests
+```
+
+### `setup_logged_in_test`
+
+```
+Scope:     function
+Auth:      AUTH (ADMIN_TEST_EMAIL / ADMIN_TEST_PASSWORD)
+Setup:     Opens BASE_URL → clicks Account → Login → fills creds → verifies homepage title
+Teardown:  clear_cookies + localStorage.clear() + sessionStorage.clear()
+Yields:    HomePage
+Used by:   TOP-015, TOP-016, TOP-018, TOP-019
+```
+
+### `setup_cart_with_product`
+
+```
+Scope:     function
+Auth:      ANON
+Setup:     Opens BASE_URL → navigates to Metal Brackets Mini product page
+           → selects MBT .018 / Hooks On 3 / Maxillary Right Canine (UR3) → clicks Add to Cart
+Teardown:  clear_cookies + localStorage.clear() + sessionStorage.clear()
+Yields:    HomePage
+Used by:   CART-010, CART-011, CART-012, CART-013, CART-014
+```
+
+Product navigation path:
+```
+Homepage → Bracket Systems → Metal Brackets (Standard, Mini, Self-Ligating, Vertical Slot)
+         → Metal Brackets - Mini Size → Metal Brackets - Mini
+```
+
+### `setup_order_test`
+
+```
+Scope:     function
+Auth:      ANON (login/registration happens inside the test body)
+Setup:     Opens BASE_URL, verifies homepage title
+Teardown:  clear_cookies + localStorage.clear()
+           → Admin login → delete orders for ADMIN_TEST_EMAIL
+           → Admin panel → delete customer with ADMIN_NEW_EMAIL
+Yields:    HomePage
+Used by:   CHK-001 (test_checkout_flow), REG-001 (test_reg_on_reg_page)
+```
+
+> Note: `setup_order_test` performs admin cleanup **after** `clear_cookies` in teardown. This works because the admin login is a separate navigation step that establishes a fresh session.
+
+---
+
+## 4. Page Objects Reference
+
+### `BasePage`
+
+| Method | Signature | Notes |
+|--------|-----------|-------|
+| `open` | `open(url: str)` | `goto(url, wait_until="domcontentloaded", timeout=60000)` |
+| `click` | `click(selector: str)` | `page.click(selector)` |
+| `fill` | `fill(selector: str, text: str)` | `page.fill(selector, text)` |
+| `get_text` | `get_text(selector: str) -> str` | `page.inner_text(selector)` |
+| `take_screenshot` | `take_screenshot(name: str)` | Saves to `screenshots/` with timestamp |
+
+---
+
+### `HomePage`
+
+Has `self.header = Header(page)`.
+
+| Method | Notes |
+|--------|-------|
+| `check_title()` | Asserts page title == `"Orthodontic Supplies Store..."` |
+| `click_category_by_name(name)` | Waits for `span.catagory-wrap__item--name` and clicks |
+| `set_stripe_cookie()` | Sets `stripe_dev_test=1` cookie via JS (required for checkout test) |
+
+---
+
+### `LoginPage`
+
+Reads `ADMIN_TEST_EMAIL` / `ADMIN_TEST_PASSWORD` from env.
+
+| Method | Notes |
+|--------|-------|
+| `add_creds_and_login()` | Fills email + password + clicks Login button |
+
+---
+
+### `CategoryPage`
+
+| Method | Notes |
+|--------|-------|
+| `click_category_by_name(name)` | Clicks `span.catagory-wrap__item--name:has-text(name)` |
+| `click_product_by_name(name)` | Clicks `a.prodcard__link:has-text(name)` (first match) |
+
+---
+
+### `ProductPage`
+
+| Method | Notes |
+|--------|-------|
+| `select_option_value_by_name(name)` | Clicks `label:has-text(name)` (radio/checkbox option) |
+| `click_add_to_cart_button()` | Clicks `a:has-text('Add to Cart')` |
+
+---
+
+### `CheckoutPage`
+
+Full multi-step checkout. Steps called in order:
+
+| Method | Step |
+|--------|------|
+| `check_url()` | Asserts URL matches `check-out` |
+| `click_continue_button_delivery_method_step()` | Clicks `#button-shipping-method` |
+| `click_continue_button_shipping_adress_step()` | Clicks `#button-shipping-address` |
+| `click_continue_button_coupon_voucher_step()` | Clicks `#button-coupon-voucher` |
+| `fill_cc_data()` | Fills Stripe iframe fields: card `4242424242424242`, exp `0133`, cvc `111` |
+| `click_continue_button_payment_info_step()` | Clicks `#button-confirm` |
+| `sign_cc_payment()` | Draws signature on `canvas.jSignature` via mouse events |
+| `click_submit_button_signature_step()` | Clicks `#button-submit-order` |
+
+> Requires `set_stripe_cookie()` to be called before starting checkout (use `home_page.set_stripe_cookie()`).
+
+---
+
+### `CheckoutSuccessPage`
+
+| Method | Notes |
+|--------|-------|
+| `verify_checkout_success_page()` | Asserts `.asteps__head` text == `"Your Order Has Been Processed!"` |
+
+---
+
+### `RegistrationPage`
+
+Multi-step registration flow. Steps called in order:
+
+| Method | Step |
+|--------|------|
+| `verify_reg_page_title()` | Asserts page title == `"Create Account"` |
+| `fill_email()` | Fills `ADMIN_NEW_EMAIL` into `input[name="email"]` via `press_sequentially` |
+| `fill_phone()` | Fills hardcoded `"5656565656"` |
+| `fill_password()` | Fills `ADMIN_TEST_PASSWORD` |
+| `fill_confirm_password()` | Fills `ADMIN_TEST_PASSWORD` again |
+| `check_business_account()` | Selects business account type via JS (jQuery trigger) |
+| `click_next_batton()` | Clicks `button[data-step-btn="next"]` + waits 2s |
+| `verify_business_acount()` | Asserts `input[name="company_name"]` is visible |
+| `fill_first_name()` | Fills `"Auto test new"` |
+| `fill_last_name()` | Fills `"Auto test new"` |
+| `verify_register_acount_step()` | Asserts `.aform__head` text == `"Register Account"` |
+| `check_agree_checkbox()` | Clicks `label[for="agree"]` |
+| `click_register_batton()` | Clicks `button[data-step-btn="send"]` + waits 2s |
+| `verify_registation()` | Asserts `.asteps__head` text == `"Your Account Has Been Created!"` |
+
+---
+
+### `CheckoutPopUp` (component)
+
+| Method | Notes |
+|--------|-------|
+| `verify_adding_product_by_name(name)` | Asserts `.line-clamp-2` first element has text == name |
+| `remove_product_from_popup()` | Clicks `button.y-basket-card__remove` (first) |
+| `verify_product_removed_from_popup()` | Asserts `.y-modal__header` contains `"YOUR SHOPPING CART IS EMPTY!"` |
+| `click_checkout_button()` | Clicks `a.y-modal__cart-btn:has-text('Checkout')` (first) |
+
+---
+
+### `Header` (component)
+
+All selectors are class constants. Methods grouped by zone.
+
+#### Selector constants
+
+| Constant | Value | Zone |
+|----------|-------|------|
+| `CART_BUTTON` | `'button.int-cart-button.is_cart'` | ZONE-5 (legacy) |
+| `ACCOUNT_BUTTON` | `'span:has-text("Account")'` | ZONE-1 (legacy) |
+| `LOGIN_BUTTON` | `'span:has-text("Login")'` | ZONE-1 (legacy) |
+| `LOGOUT_BUTTON` | `'span:has-text("Logout")'` | ZONE-1 (legacy) |
+| `REGISTER_BUTTON` | `'span:has-text("Register")'` | ZONE-1 (legacy) |
+| `CUSTOMER_COUNTER` | `'.int-header-top-counter'` | ZONE-1 |
+| `COUNTER_DIGIT_SPANS` | `'.int-header-top-counter span'` | ZONE-1 |
+| `SHOPPING_PLUS_LINK` | `'a.int-header-top-right-link.is_current'` | ZONE-1 |
+| `INVENTORY_LINK` | `'a.int-header-top-right-link[href*="drstorelist"]'` | ZONE-1 |
+| `PAYMENT_LINK` | `'a.int-header-top-right-link[href*="drslider"]'` | ZONE-1 |
+| `LAB_TRACKER_LINK` | `'a.int-header-top-right-link[href*="account/lab"]'` | ZONE-1 |
+| `VIP_BADGES` | `'a.int-header-top-right-link:not(.is_current) .int-header-top-badge'` | ZONE-1 |
+| `ACCOUNT_MODAL_DESKTOP` | `'.int-header-top-right-account .y-modal.is_user'` | ZONE-1 |
+| `ACCOUNT_BUTTON_DESKTOP` | `'button.int-account-button'` | ZONE-1 |
+| `MY_ACCOUNT_LINK` | `'.int-header-top-right-account a[href*="account/account"]'` | ZONE-1 |
+| `LOGOUT_LINK_DESKTOP` | `'.int-header-top-right-account a[href*="account/logout"]'` | ZONE-1 |
+| `ACCOUNT_GREETING` | `'.int-account-button-text span:first-child'` | ZONE-1 |
+| `SLOGAN` | `'p.int-header-left-serving'` | ZONE-2 |
+| `MAIN_LOGO_LINK` | `'.int-header-left a[href="/"]'` | ZONE-2 |
+| `MAIN_LOGO_IMG` | `'.int-header-left img[alt="logo"]'` | ZONE-2 |
+| `AAO_LOGO_IMG` | `'.int-header-left img[alt="aao"]'` | ZONE-2 |
+| `PHONE_LINK` | `'.int-header-center-top a[href="tel:800-833-7132"]'` | ZONE-3 |
+| `CLEARANCE_LINK` | `'.int-header-center-top a[href*="clearance"]'` | ZONE-3 |
+| `BRANDS_LINK` | `'.int-header-center-top a[href*="/brands"]'` | ZONE-3 |
+| `DASHBOARD_LINK` | `'.int-header-center-top a[href*="sampledashboard"]'` | ZONE-3 |
+| `ORDERS_LINK` | `'.int-header-center-top a[href*="allorders"]'` | ZONE-3 |
+| `BUY_AGAIN_LINK` | `'.int-header-center-top a[href*="quickreorder"]'` | ZONE-3 |
+| `SEARCH_INPUT` | `'input.y-search__inp.int-header-search-input'` | ZONE-4 |
+| `SEARCH_BUTTON` | `'button.int-header-search-button'` | ZONE-4 |
+| `WISHLIST_BUTTON` | `'a.int-wishlist-button'` | ZONE-5 |
+| `WISHLIST_COUNT` | `'.int-wishlist-button-indicator'` | ZONE-5 |
+| `CART_MODAL` | `'.int-header-right .y-modal.is_cart'` | ZONE-5 |
+| `CART_CLOSE_BUTTON` | `'.int-header-right button.y-modal__btn-close'` | ZONE-5 |
+| `CART_TOTAL_ROWS` | `'.int-header-right .y-modal__cart-total--row'` | ZONE-5 |
+| `VIEW_CART_BUTTON` | `".int-header-right a.y-modal__cart-btn:has-text('View Cart')"` | ZONE-5 |
+| `CHECKOUT_BUTTON_MODAL` | `".int-header-right a.y-modal__cart-btn:has-text('Checkout')"` | ZONE-5 |
+| `CATEGORY_PILLS` | `'.int-header-categories .int-header-categories-pill'` | ZONE-6 |
+| `DENTAL_PILL` | `'.int-header-categories a[href*="general-dentistry"]'` | ZONE-6 |
+| `SURGERY_PILL` | `'.int-header-categories a[href*="surgical-and-implant"]'` | ZONE-6 |
+| `ORTHODONTIC_PILL` | `'.int-header-categories .int-header-categories-pill:last-child'` | ZONE-6 |
+
+---
+
+## 5. Known Quirks
+
+### 5.1 Duplicate Elements (mobile DOM + footer)
+
+`div.y-header-mobile` is always in DOM (hidden via CSS at viewport ≥ 1280px). It duplicates several header elements. Additionally, some elements exist in the footer.
+
+| Selector fragment | DOM count | Resolution |
+|-------------------|-----------|------------|
+| `button.int-cart-button.is_cart` | 2 | `.filter(visible=True).first` |
+| `div.y-modal.is_cart` | 2 | scope to `.int-header-right` |
+| `button.int-account-button` | 2 | `.filter(visible=True).first` |
+| `input.y-search__inp` | 2 | `.int-header-search-input` class makes it unique |
+| VIP links (`drstorelist`, `drslider`, `account/lab`) | 2 each | `a.int-header-top-right-link` class (desktop only) |
+| `a[href="tel:800-833-7132"]` | 3 (header + mobile + **footer**) | scope to `.int-header-center-top` |
+| `a[href*="/brands"]` | 2 (header + **footer**) | scope to `.int-header-center-top` |
+
+Two patterns used depending on element location:
+
 ```python
-# Pattern A: .filter(visible=True).first — for elements only visible at current viewport
+# Pattern A — element hidden in mobile, visible on desktop:
 self.page.locator(".int-cart-text-indicator").filter(visible=True).first
 
-# Pattern B: CSS scope to parent container — for elements also in footer (not hideable by viewport)
+# Pattern B — element also in footer (filter won't help — footer is visible):
 self.page.locator(".int-header-center-top a[href='tel:800-833-7132']")
-self.page.locator("a.int-header-top-right-link[href*='drstorelist']")
 ```
-**DO NOT** use `locator.nth(0)` — order is not guaranteed.
-**DO NOT** use `.filter(visible=True)` for elements that also appear in footer — footer may be visible at desktop viewport.
 
----
+Do NOT use `.nth(0)` — element order in DOM is not guaranteed.
 
-## 3. Selector Reference Table
+### 5.2 Cart Modal (Journal2 animation)
 
-All selectors for `Header` component methods. Use `self.page.locator(SELECTOR)`.
+The cart modal stays `display:block` at all times. Playwright's `is_visible()` and `wait_for(state="hidden")` do not work.
 
-| Element | Selector | Notes |
-|---------|----------|-------|
-| Customer counter block | `.int-header-top-counter` | Unique — no duplicate in mobile |
-| Counter digit spans | `.int-header-top-counter span` | Expect count == 5 |
-| Shopping+ link | `a.int-header-top-right-link.is_current` | Unique |
-| Inventory link | `a.int-header-top-right-link[href*="drstorelist"]` | Desktop class prevents mobile tab duplicate |
-| Payment link | `a.int-header-top-right-link[href*="drslider"]` | Desktop class prevents mobile tab duplicate |
-| Lab Tracker link | `a.int-header-top-right-link[href*="account/lab"]` | Desktop class prevents mobile tab duplicate |
-| VIP badges | `a.int-header-top-right-link:not(.is_current) .int-header-top-badge` | Excludes Shopping+ (is_current) which also has a badge → 3 not 4 |
-| Account button | `button.int-account-button` | ⚠ Duplicate → `.filter(visible=True).first` |
-| Account greeting | `.int-account-button-text span:first-child` | ⚠ Duplicate → `.filter(visible=True).first` |
-| Account modal (desktop) | `.int-header-top-right-account .y-modal.is_user` | Scoped — unique |
-| My Account link | `.int-header-top-right-account a[href*="account/account"]` | AUTH only |
-| Logout link | `.int-header-top-right-account a[href*="account/logout"]` | AUTH only |
-| Slogan | `p.int-header-left-serving` | Unique |
-| Main logo link | `.int-header-left a[href="/"]` | Use `.first` (logo + home links) |
-| Main logo img | `.int-header-left img[alt="logo"]` | Unique |
-| AAO logo img | `.int-header-left img[alt="aao"]` | Unique |
-| Phone link | `.int-header-center-top a[href="tel:800-833-7132"]` | ⚠ 3 in DOM (header + mobile + footer) → scope to center-top |
-| Clearance link | `.int-header-center-top a[href*="clearance"]` | Scoped defensively |
-| Brands link | `.int-header-center-top a[href*="/brands"]` | ⚠ Duplicate in footer → scope to center-top |
-| Dashboard link | `.int-header-center-top a[href*="sampledashboard"]` | Scoped defensively |
-| Your Orders link | `.int-header-center-top a[href*="allorders"]` | Scoped defensively |
-| Buy again link | `.int-header-center-top a[href*="quickreorder"]` | Scoped defensively |
-| Search input | `input.y-search__inp.int-header-search-input` | `.y-search__inp` alone is duplicate; combined class is desktop-only — unique |
-| Search button | `button.int-header-search-button` | Unique (has `int-header-search-button` class) |
-| Search dropdown | `div.search_results_container` | ⚠ Duplicate → `.filter(visible=True).first` |
-| Search results right | `div.search_results_right` | ⚠ Duplicate → `.filter(visible=True).first` |
-| Wishlist button | `a.int-wishlist-button` | Unique (desktop only element) |
-| Wishlist count | `.int-wishlist-button-indicator` | Unique |
-| Cart button | `button.int-cart-button.is_cart` | ⚠ Duplicate → `.filter(visible=True).first` |
-| Cart count | `.int-cart-text-indicator` | ⚠ Duplicate → `.filter(visible=True).first` |
-| Cart modal | `.int-header-right .y-modal.is_cart` | Scoped to `.int-header-right` — unique |
-| Cart modal title | `div.y-modal__title` | ⚠ Duplicate → `.filter(visible=True).first` |
-| Cart close button | `.int-header-right button.y-modal__btn-close` | Scoped |
-| Cart product cards | `.int-header-right .y-basket-card` | Scoped |
-| Cart total rows | `.int-header-right .y-modal__cart-total--row` | Scoped |
-| View Cart button | `.int-header-right a.y-modal__cart-btn:has-text('View Cart')` | Scoped — unique |
-| Checkout button | `.int-header-right a.y-modal__cart-btn:has-text('Checkout')` | Scoped — unique |
-| Category pills | `.int-header-categories .int-header-categories-pill` | Unique |
-| Dental pill | `.int-header-categories a[href*="general-dentistry"]` | Unique |
-| Surgery pill | `.int-header-categories a[href*="surgical-and-implant"]` | Unique |
-| Orthodontic pill | `.int-header-categories .int-header-categories-pill:last-child` | href="" — test visibility only! |
+**Confirmed non-working approaches (from 2 test runs):**
+- `is_visible()` — always `True`
+- `wait_for(state="hidden")` — never fires
+- `getBoundingClientRect()` — modal rect does not change between open and closed
 
----
+**Root cause:** Journal2 uses `pointer-events: none` (closed) / `pointer-events: auto` (open).
 
-## 4. Fixtures (conftest.py)
-
-### Existing fixtures
-
+**Working approach:**
 ```python
-# Unauthenticated. Opens homepage, clears cookies/storage on teardown.
-# Use for: ANON tests
-@pytest.fixture(scope="function")
-def setup_base_test(page, context) -> HomePage
+# Open check:
+window.getComputedStyle(el).pointerEvents !== 'none'
+
+# Closed check:
+window.getComputedStyle(el).pointerEvents === 'none'
 ```
 
+Used via `page.evaluate()` for instant check and `page.wait_for_function()` for waiting.
+
+### 5.3 Search Autocomplete
+
+- Debounce: 1000ms after typing stops.
+- Minimum 3 characters to trigger AJAX request.
+- Existing code uses `.type(text, delay=100)` — simulates human typing to trigger debounce.
+- New code uses `.fill()` (instant) for negative tests (SRCH-005).
+- Dropdown selector: `div.search_results_container`.
+
+### 5.4 VIP Badge Count
+
+`Shopping+` link (`.is_current`) also has a badge element. The `VIP_BADGES` selector explicitly excludes it with `:not(.is_current)` to keep the count at 3.
+
+### 5.5 Orthodontic Category Pill
+
+Has `href=""` — links back to the current page. Test visibility only; do not test navigation.
+
+### 5.6 Checkout Test Requirements
+
+- Must call `set_stripe_cookie()` before navigating to checkout (enables test mode).
+- Stripe iframe fields use `frame_locator` — they cannot be filled with standard `fill()`.
+- Signature step requires mouse events (`mouse.move` + `mouse.down` + `mouse.up`).
+- `setup_order_test` cleans up created orders and the new registered customer in teardown.
+
+### 5.7 Registration Page — JS-driven steps
+
+The business account type selection uses jQuery triggers (not a simple click):
 ```python
-# Unauthenticated. Opens homepage + cleans up orders/customers in admin on teardown.
-# Use for: tests that create orders (checkout, registration)
-@pytest.fixture(scope="function")
-def setup_order_test(page, context) -> HomePage
+page.evaluate("jQuery('#registration_type_id_2').trigger('change'); ...")
 ```
-
-### New fixture (added in this branch)
-
-```python
-# Authenticated. Opens homepage, logs in, yields HomePage.
-# Clears cookies on teardown.
-# Use for: TOP-015..019 (account dropdown auth state)
-@pytest.fixture(scope="function")
-def setup_logged_in_test(page, context) -> HomePage
-```
+This is required because the standard radio button is not directly clickable in the current UI.
 
 ---
 
-## 5. Known Quirks & Edge Cases
-
-### 5.1 Search Autocomplete
-- **Debounce:** 1000ms. Use `.type(text, delay=100)` (simulates human typing)
-  OR `page.fill()` + `page.wait_for_timeout(1500)`. Existing code uses `.type(delay=100)`.
-- **Minimum chars:** 3. Below 3 → no AJAX call → no dropdown.
-- **Dropdown detection:** `div.search_results_container` (injected into `#search`).
-- **Existing code uses:** `search_popup.wait_for(state="visible", timeout=15000)`.
-
-### 5.2 Cart & Account Modals
-- The cart modal (`.int-header-right .y-modal.is_cart`) stays `display:block`, `visibility:visible`
-  at all times. Two approaches were tried and confirmed NOT to work on this site:
-  - `is_visible()` / `wait_for(state="hidden")` — always returns True/never fires
-  - `getBoundingClientRect()` viewport check — modal rect does not change between open/closed
-- **Root cause (confirmed across 2 test runs):** Journal2 controls the cart panel using
-  `pointer-events: none` (closed) / `pointer-events: auto` (open), keeping the DOM element
-  visually rendered but non-interactive when hidden.
-- Open/closed detection uses **`window.getComputedStyle(el).pointerEvents`** via `page.evaluate()`:
-  - Open: `pointerEvents !== 'none'`
-  - Closed: `pointerEvents === 'none'`
-- `open_cart_modal()` → clicks cart button + `page.wait_for_function(_CART_MODAL_OPEN_JS)`.
-- `close_cart_modal()` → clicks close button + `page.wait_for_function(_CART_MODAL_CLOSED_JS)`.
-- `cart_modal_is_visible()` → returns bool from `page.evaluate(_CART_MODAL_OPEN_JS)`.
-- The account dropdown modal uses a different mechanism — `is_visible()` works for it.
-- Existing `click_cart_popup_button()` uses `get_text()` with `assert ==` (not `expect()`).
-  New methods should use `expect()` for consistency with other components.
-
-### 5.3 Account dropdown — scoping
-- Desktop account modal: `.int-header-top-right-account .y-modal.is_user`
-  This selector is unique (scoped to the desktop zone). No `.filter(visible=True)` needed.
-- The existing `ACCOUNT_BUTTON = 'span:has-text("Account")'` is text-based and
-  may be fragile if text changes. New methods use `button.int-account-button` with
-  `.filter(visible=True).first`.
-
-### 5.4 Orthodontic category pill
-- `href=""` — links to current page, NOT a broken link. Test visibility only.
-
-### 5.5 Customer counter
-- Shows 5 `<span>` elements (animated odometer). Test the count of spans (5), 
-  NOT the exact numeric value (changes between page loads).
-
-### 5.6 Logo link
-- `a[href="/"]` matches BOTH the logo link AND possibly others.
-  Use `.int-header-left a[href="/"]` to scope.
-
-### 5.7 Auth: account dropdown state
-- **Guest:** clicking account button shows Login + Register buttons (via `ACCOUNT_BUTTON` = `span:has-text("Account")`).
-- **Logged in:** clicking account button shows My Account + Logout links.
-  Greeting text `Hi Name!` is in `span:first-child` inside `.int-account-button-text`.
-- Note: existing `ACCOUNT_BUTTON = 'span:has-text("Account")'` works for both states
-  because "Account" text is always in the button. Do NOT change this selector.
-
----
-
-## 6. Environment Variables
+## 6. How to Run
 
 ```bash
-# .env (copy from .env.example)
-BASE_URL=https://orthazone.com/       # target environment URL
-
-ADMIN_USERNAME=                        # OpenCart admin username
-ADMIN_PASSWORD=                        # OpenCart admin password
-ADMIN_TEST_EMAIL=                      # test customer email (login in tests)
-ADMIN_TEST_PASSWORD=                   # test customer password
-ADMIN_NEW_EMAIL=                       # new email for registration tests
-```
-
-> ⚠️ Never put `TEST_EMAIL` / `TEST_PASSWORD` — those are NOT the var names used in this project.
-> Correct names: `ADMIN_TEST_EMAIL`, `ADMIN_TEST_PASSWORD`.
-
----
-
-## 7. How to Run
-
-```bash
-# Install deps
+# Install
 pip install pytest-playwright python-dotenv
-
-# Install browsers
 playwright install chromium
 
-# Run all tests
+# All tests
 pytest tests/ -s
 
-# Run only header tests
+# One suite
 pytest tests/test_header.py -s -v
 
-# Screenshots + tracing only on failure (matches CI config)
+# One test
+pytest tests/test_header.py::test_top001_customer_counter_visible -s
+
+# Headed + slow motion (for debugging)
+pytest tests/test_header.py -s --headed --slowmo 500
+
+# On failure only: screenshots + traces (matches CI config)
 pytest tests/ -s --screenshot only-on-failure --tracing retain-on-failure --output=test-results
 
-# Headed mode for debugging
-pytest tests/test_header.py -s --headed --slowmo 500
+# Run against a specific environment
+BASE_URL=https://stage2.dentazone.com/ pytest tests/ -s
 ```
 
 ---
 
-## 8. Code Style Conventions
+## 7. Code Style
 
 ```python
-# ✅ Correct: test function names are fully lowercase snake_case
+# Test function names: fully lowercase snake_case
 def test_top001_customer_counter_visible(page, setup_base_test): ...
-def test_cart010_cart_modal_shows_subtotal(page, setup_cart_with_product): ...
 
-# ❌ Wrong: no uppercase letters in test names
-def test_TOP001_customer_counter_visible(page, setup_base_test): ...  # NO
-def test_Cart010_cart_modal_shows_subtotal(page, setup_base_test): ...  # NO
-
-# ✅ Correct: class constant for selectors
+# Class constants for all selectors (UPPER_CASE)
 class Header(BasePage):
     CART_BUTTON = 'button.int-cart-button.is_cart'
 
-    def some_method(self):
-        self.page.locator(self.CART_BUTTON).filter(visible=True).first.click()
-
-# ✅ Correct: use expect() for assertions with auto-retry
+# expect() for assertions with auto-retry (inside component methods)
 def verify_something(self):
-    expect(self.page.locator(".some-element")).to_be_visible(timeout=15000)
+    expect(self.page.locator(".element")).to_be_visible(timeout=10000)
 
-# ✅ Correct: assert for simple attribute checks
-def test_something(page, setup_base_test):
+# assert for simple attribute checks (inside test bodies)
+def test_top008_shopping_plus_href_is_home(page, setup_base_test):
+    _ = setup_base_test
     header = Header(page)
-    href = header.get_phone_href()
-    assert href == "tel:800-833-7132"
+    assert header.get_shopping_plus_href() == "/"
 
-# ❌ Wrong: don't create sub-components
-class TopBarComponent:  # NO — keep everything in Header
-
-# ❌ Wrong: don't use index-based nth() for deduplication
-self.page.locator(".int-cart-text-indicator").nth(0)  # NO
-
-# ✅ Correct: use .filter(visible=True).first for deduplication
+# Deduplication: .filter(visible=True).first — never .nth(0)
 self.page.locator(".int-cart-text-indicator").filter(visible=True).first
 ```
