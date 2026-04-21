@@ -7,7 +7,7 @@ def test_reg_on_reg_page(page, setup_order_test: HomePage):
     home_page = setup_order_test
     registration_page = RegistrationPage(page)
 
-    home_page.header.click_account_button()
+    home_page.header.click_account_button_desktop()
     home_page.header.click_register_button()
     registration_page.verify_reg_page_title()
 

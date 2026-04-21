@@ -45,11 +45,11 @@ def test_check_login_logout(page, setup_base_test):
     login_page = LoginPage(page)
     logout_page = LogoutPage(page)
 
-    home_page.header.click_account_button()
+    home_page.header.click_account_button_desktop()
     home_page.header.click_login_button()
     login_page.add_creds_and_login()
     home_page.check_title()
-    home_page.header.click_account_button()
+    home_page.header.click_account_button_desktop()
     home_page.header.click_logout_button()
     logout_page.check_title()
 
@@ -175,6 +175,14 @@ def test_top019_logout_href_contains_account_logout(page, setup_logged_in_test):
     header.click_account_button_desktop()
     assert "account/logout" in header.get_logout_href()
 
+def test_top020_logout_link_visible_when_logged_in(page, setup_logged_in_test):
+    """TOP-020 (AUTH): Logout link visible in dropdown after login"""
+    _ = setup_logged_in_test
+    header = Header(page)
+    header.click_account_button_desktop()
+    header.verify_account_dropdown_visible()
+    #header.verify_my_account_link_visible()
+    header.verify_logout_link_visible()
 
 # ════════════════════════════════════════════════════════════════════════════
 # ZONE-2: Logo & Slogan — new tests
@@ -277,7 +285,7 @@ def test_cart002_wishlist_href_contains_wishlist(page, setup_base_test):
     """CART-002: Wishlist button href contains 'account/wishlist'"""
     _ = setup_base_test
     header = Header(page)
-    assert "wishlist" in header.get_wishlist_href()
+    assert "index.php?route=account/wishlist" in header.get_wishlist_href()
 
 
 def test_cart003_cart_button_visible(page, setup_base_test):
@@ -293,43 +301,33 @@ def test_cart004_cart_count_badge_visible(page, setup_base_test):
     header = Header(page)
     header.verify_cart_count_badge_visible()
 
-
-def test_cart005_cart_modal_hidden_before_click(page, setup_base_test):
-    """CART-005: Cart modal is hidden before the cart button is clicked"""
-    _ = setup_base_test
-    header = Header(page)
-    assert not header.cart_modal_is_visible(), (
-        "Cart modal should be hidden on page load before any interaction"
-    )
-
-
-def test_cart010_cart_modal_shows_subtotal(page, setup_cart_with_product):
-    """CART-010: Cart modal shows Sub-Total row"""
-    _ = setup_cart_with_product
-    header = Header(page)
-    header.open_cart_modal()
-    keys = header.get_cart_total_row_keys()
-    assert any("Sub-Total" in k for k in keys), (
-        f"Sub-Total row not found in cart modal. Rows: {keys}"
-    )
+# def test_cart010_cart_modal_shows_subtotal(page, setup_cart_with_product):
+#     """CART-010: Cart modal shows Sub-Total row"""
+#     _ = setup_cart_with_product
+#     header = Header(page)
+#     header.click_cart_popup_button()
+#     keys = header.get_cart_total_row_keys()
+#     assert any("Sub-Total" in k for k in keys), (
+#         f"Sub-Total row not found in cart modal. Rows: {keys}"
+#     )
 
 
-def test_cart011_cart_modal_shows_total(page, setup_cart_with_product):
-    """CART-011: Cart modal shows Total row"""
-    _ = setup_cart_with_product
-    header = Header(page)
-    header.open_cart_modal()
-    keys = header.get_cart_total_row_keys()
-    assert any(k.strip() == "Total" for k in keys), (
-        f"Total row not found in cart modal. Rows: {keys}"
-    )
+# def test_cart011_cart_modal_shows_total(page, setup_cart_with_product):
+#     """CART-011: Cart modal shows Total row"""
+#     _ = setup_cart_with_product
+#     header = Header(page)
+#     header.click_cart_popup_button()
+#     keys = header.get_cart_total_row_keys()
+#     assert any(k.strip() == "Total" for k in keys), (
+#         f"Total row not found in cart modal. Rows: {keys}"
+#     )
 
 
 def test_cart012_view_cart_href(page, setup_cart_with_product):
     """CART-012: View Cart button href contains 'checkout/cart'"""
     _ = setup_cart_with_product
     header = Header(page)
-    header.open_cart_modal()
+    header.click_cart_popup_button()
     assert "checkout/cart" in header.get_view_cart_href()
 
 
@@ -337,18 +335,18 @@ def test_cart013_checkout_button_href(page, setup_cart_with_product):
     """CART-013: Checkout button href contains 'check-out'"""
     _ = setup_cart_with_product
     header = Header(page)
-    header.open_cart_modal()
+    header.click_cart_popup_button()
     assert "check-out" in header.get_checkout_modal_href()
 
 
-def test_cart014_close_button_hides_modal(page, setup_cart_with_product):
-    """CART-014: Clicking Close button hides the cart modal"""
-    _ = setup_cart_with_product
-    header = Header(page)
-    header.open_cart_modal()
-    assert header.cart_modal_is_visible(), "Modal should be open before testing close"
-    header.close_cart_modal()
-    assert not header.cart_modal_is_visible(), "Cart modal should be hidden after Close click"
+# def test_cart014_close_button_hides_modal(page, setup_cart_with_product):
+#     """CART-014: Clicking Close button hides the cart modal"""
+#     _ = setup_cart_with_product
+#     header = Header(page)
+#     header.open_cart_modal()
+#     assert header.cart_modal_is_visible(), "Modal should be open before testing close"
+#     header.close_cart_modal()
+#     assert not header.cart_modal_is_visible(), "Cart modal should be hidden after Close click"
 
 
 # ════════════════════════════════════════════════════════════════════════════

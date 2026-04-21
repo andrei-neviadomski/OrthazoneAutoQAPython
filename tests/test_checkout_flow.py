@@ -21,7 +21,7 @@ def test_checkout_flow(page, setup_order_test):
 
     home_page.set_stripe_cookie()
 
-    home_page.header.click_account_button()
+    home_page.header.click_account_button_desktop()
     home_page.header.click_login_button()
 
     login_page.add_creds_and_login()

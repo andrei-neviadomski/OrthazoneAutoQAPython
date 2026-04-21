@@ -116,7 +116,7 @@ def setup_logged_in_test(page, context):
     login_page = LoginPage(page)
 
     home_page.open(base_url)
-    home_page.header.click_account_button()
+    home_page.header.click_account_button_desktop()
     home_page.header.click_login_button()
     login_page.add_creds_and_login()
     home_page.check_title()

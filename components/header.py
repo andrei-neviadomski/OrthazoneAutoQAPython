@@ -9,7 +9,6 @@ class Header(BasePage):
 
     # ── Existing selectors (DO NOT change) ─────────────────────────────────
     CART_BUTTON = 'button.int-cart-button.is_cart'
-    ACCOUNT_BUTTON = 'span:has-text("Account")'
     LOGIN_BUTTON = 'span:has-text("Login")'
     LOGOUT_BUTTON = 'span:has-text("Logout")'
     REGISTER_BUTTON = 'span:has-text("Register")'
@@ -79,10 +78,6 @@ class Header(BasePage):
         self.click(self.CART_BUTTON)
         assert self.get_text("div.y-modal__title") == "SHOPPING CART"
 
-    def click_account_button(self):
-        """Click the account button"""
-        self.click(self.ACCOUNT_BUTTON)
-
     def click_login_button(self):
         """Click the Login button"""
         self.click(self.LOGIN_BUTTON)
@@ -120,7 +115,7 @@ class Header(BasePage):
 
     def verify_customer_counter_visible(self):
         """ZONE-1: Verify customer counter block is visible"""
-        expect(self.page.locator(self.CUSTOMER_COUNTER)).to_be_visible(timeout=15000)
+        expect(self.page.locator(self.CUSTOMER_COUNTER)).to_be_visible(timeout=10000)
 
     def get_counter_digit_count(self) -> int:
         """ZONE-1: Return number of digit spans inside customer counter (expect 5)"""
@@ -176,7 +171,7 @@ class Header(BasePage):
         """ZONE-1: Click account button (desktop) and wait for dropdown animation"""
         btn = self.page.locator(self.ACCOUNT_BUTTON_DESKTOP).filter(visible=True).first
         btn.click()
-        self.page.wait_for_timeout(400)
+        self.page.wait_for_selector(self.ACCOUNT_MODAL_DESKTOP, state="visible")
 
     def verify_account_dropdown_visible(self):
         """ZONE-1: Verify the account dropdown modal is visible"""
@@ -185,6 +180,10 @@ class Header(BasePage):
     def verify_my_account_link_visible(self):
         """ZONE-1 (AUTH): Verify My Account link is visible in dropdown"""
         expect(self.page.locator(self.MY_ACCOUNT_LINK)).to_be_visible(timeout=10000)
+
+    def verify_logout_link_visible(self):
+        """ZONE-1 (AUTH): Verify Logout link is visible in dropdown"""
+        expect(self.page.locator(self.LOGOUT_LINK_DESKTOP)).to_be_visible(timeout=10000)
 
     def get_my_account_href(self) -> str:
         """ZONE-1 (AUTH): Return My Account link href"""
@@ -260,9 +259,10 @@ class Header(BasePage):
         then waits longer than the 1000ms debounce to confirm nothing appears.
         """
         assert len(query) < 3, "This method is for queries shorter than 3 chars"
-        self.page.locator(self.SEARCH_INPUT).fill(query)
+        self.page.locator(self.SEARCH_INPUT).type(query, delay=100)
         self.page.wait_for_timeout(2000)
-        expect(self.page.locator("div.search_results_container")).not_to_be_visible(timeout=500)
+        expect(self.page.locator(
+            "div.search_results_container").first).not_to_be_visible(timeout=10000)
 
     # ════════════════════════════════════════════════════════════════════════
     # ZONE-5: Wishlist & Cart — new methods
@@ -290,52 +290,10 @@ class Header(BasePage):
         badge = self.page.locator(".int-cart-text-indicator").filter(visible=True).first
         expect(badge).to_be_visible(timeout=10000)
 
-    # Journal2 cart modal open/close detection.
-    #
-    # Two approaches that do NOT work on this site:
-    #   - Playwright is_visible() / wait_for(state="hidden"):
-    #     The modal stays display:block, visibility:visible at all times
-    #   - Bounding-box viewport check (getBoundingClientRect):
-    #     The modal rect does not change between open and closed states
-    #
-    # Root cause confirmed from two test runs: the modal position never changes.
-    # Journal2 uses pointer-events:auto/none to control interactability.
-    # When closed: pointer-events:none  -> computed style check returns false
-    # When open:   pointer-events:auto  -> computed style check returns true
-    _CART_MODAL_OPEN_JS = """
-        () => {
-            const el = document.querySelector('.int-header-right .y-modal.is_cart');
-            if (!el) return false;
-            return window.getComputedStyle(el).pointerEvents !== 'none';
-        }
-    """
-    _CART_MODAL_CLOSED_JS = """
-        () => {
-            const el = document.querySelector('.int-header-right .y-modal.is_cart');
-            if (!el) return true;
-            return window.getComputedStyle(el).pointerEvents === 'none';
-        }
-    """
-
-    def cart_modal_is_visible(self) -> bool:
-        """ZONE-5: Return True if cart modal is currently open (pointer-events:auto).
-
-        Playwright's is_visible() always returns True for this modal — the element
-        stays display:block at all times. pointer-events:none/auto is the reliable
-        open/closed signal used by Journal2.
-        """
-        return bool(self.page.evaluate(self._CART_MODAL_OPEN_JS))
-
-    def open_cart_modal(self):
-        """ZONE-5: Click cart button (desktop) and wait for modal to become interactive."""
-        self.page.locator(self.CART_BUTTON).filter(visible=True).first.click()
-        self.page.wait_for_function(self._CART_MODAL_OPEN_JS, timeout=10000)
-        self.page.wait_for_timeout(400)
-
-    def close_cart_modal(self):
-        """ZONE-5: Click close button and wait for modal to lose interactability."""
-        self.page.locator(self.CART_CLOSE_BUTTON).click()
-        self.page.wait_for_function(self._CART_MODAL_CLOSED_JS, timeout=10000)
+    # def close_cart_modal(self):
+    #     """ZONE-5: Click close button and wait for modal to lose interactability."""
+    #     self.page.locator(self.CART_CLOSE_BUTTON).click()
+    #     self.page.wait_for_function(self._CART_MODAL_CLOSED_JS, timeout=10000)
 
     def get_cart_total_row_keys(self) -> list[str]:
         """ZONE-5: Return list of total row key labels"""
