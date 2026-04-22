@@ -44,7 +44,6 @@ class Header(BasePage):
     # ── ZONE-4: Wishlist & Cart ─────────────────────────────────────────────
     WISHLIST_BUTTON = 'a.int-wishlist-button'
     WISHLIST_COUNT = '.int-wishlist-button-indicator'
-    CART_MODAL = '.int-header-right .y-modal.is_cart'
     ORDERS_LINK = '.int-header-right .y-modal.is_user a[href*="allorders"]'
     BUY_AGAIN_LINK = '.int-header-right .y-modal.is_user a[href*="quickreorder"]'
     CART_BUTTON = 'button.int-cart-button.is_cart'
@@ -225,7 +224,7 @@ class Header(BasePage):
         expect(badge).to_be_visible(timeout=10000)
 
     def verify_account_button_visible(self):
-        """ZONE-4   : Verify account button is visible"""
+        """ZONE-4: Verify account button is visible"""
         account_btn = self.page.locator(self.ACCOUNT_BUTTON_DESKTOP).filter(visible=True).first
         expect(account_btn).to_be_visible(timeout=10000)
 

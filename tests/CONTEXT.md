@@ -26,7 +26,7 @@ OrthazoneAutoQAPython/
 │   └── registration_page.py       ← Multi-step registration: email → phone → password → business → name → submit
 ├── tests/
 │   ├── conftest.py                ← All pytest fixtures + failure screenshot hook
-│   ├── test_header.py             ← 42 header tests (all zones)
+│   ├── test_header.py             ← 34 header tests (all zones; 10 more planned)
 │   ├── test_cart_popup_flow.py    ← 2 cart popup tests
 │   ├── test_checkout_flow.py      ← 1 checkout e2e test
 │   └── test_registration_on_reg_page.py  ← 1 registration e2e test
@@ -83,7 +83,7 @@ Auth:      AUTH (ADMIN_TEST_EMAIL / ADMIN_TEST_PASSWORD)
 Setup:     Opens BASE_URL → clicks Account → Login → fills creds → verifies homepage title
 Teardown:  clear_cookies + localStorage.clear() + sessionStorage.clear()
 Yields:    HomePage
-Used by:   TOP-015, TOP-016, TOP-018, TOP-019
+Used by:   CART-004, CART-005, CART-006
 ```
 
 ### `setup_cart_with_product`
@@ -244,46 +244,44 @@ All selectors are class constants. Methods grouped by zone.
 
 | Constant | Value | Zone |
 |----------|-------|------|
-| `CART_BUTTON` | `'button.int-cart-button.is_cart'` | ZONE-5 (legacy) |
-| `ACCOUNT_BUTTON` | `'span:has-text("Account")'` | ZONE-1 (legacy) |
-| `LOGIN_BUTTON` | `'span:has-text("Login")'` | ZONE-1 (legacy) |
-| `LOGOUT_BUTTON` | `'span:has-text("Logout")'` | ZONE-1 (legacy) |
-| `REGISTER_BUTTON` | `'span:has-text("Register")'` | ZONE-1 (legacy) |
 | `CUSTOMER_COUNTER` | `'.int-header-top-counter'` | ZONE-1 |
 | `COUNTER_DIGIT_SPANS` | `'.int-header-top-counter span'` | ZONE-1 |
 | `SHOPPING_PLUS_LINK` | `'a.int-header-top-right-link.is_current'` | ZONE-1 |
 | `INVENTORY_LINK` | `'a.int-header-top-right-link[href*="drstorelist"]'` | ZONE-1 |
+| `DASHBOARD_LINK` | `'.int-header-top-right a[href*="sampledashboard"]'` | ZONE-1 |
 | `PAYMENT_LINK` | `'a.int-header-top-right-link[href*="drslider"]'` | ZONE-1 |
 | `LAB_TRACKER_LINK` | `'a.int-header-top-right-link[href*="account/lab"]'` | ZONE-1 |
-| `VIP_BADGES` | `'a.int-header-top-right-link:not(.is_current) .int-header-top-badge'` | ZONE-1 |
+| `VIP_BADGES` | `'a.int-header-top-right-link:not(.is_current) .int-header-top-badge:text("VIP")'` | ZONE-1 |
+| `FREE_BADGES` | `'a.int-header-top-right-link .int-header-top-badge:text("Free")'` | ZONE-1 |
 | `ACCOUNT_MODAL_DESKTOP` | `'.int-header-top-right-account .y-modal.is_user'` | ZONE-1 |
 | `ACCOUNT_BUTTON_DESKTOP` | `'button.int-account-button'` | ZONE-1 |
 | `MY_ACCOUNT_LINK` | `'.int-header-top-right-account a[href*="account/account"]'` | ZONE-1 |
 | `LOGOUT_LINK_DESKTOP` | `'.int-header-top-right-account a[href*="account/logout"]'` | ZONE-1 |
 | `ACCOUNT_GREETING` | `'.int-account-button-text span:first-child'` | ZONE-1 |
+| `PHONE_LINK` | `'a.int-header-center-top-call[href="tel:800-833-7132"]'` | ZONE-1 |
 | `SLOGAN` | `'p.int-header-left-serving'` | ZONE-2 |
+| `SLOGAN_TEXT` | `"Serving the Dental Professionals Since 2015"` | ZONE-2 |
 | `MAIN_LOGO_LINK` | `'.int-header-left a[href="/"]'` | ZONE-2 |
 | `MAIN_LOGO_IMG` | `'.int-header-left img[alt="logo"]'` | ZONE-2 |
 | `AAO_LOGO_IMG` | `'.int-header-left img[alt="aao"]'` | ZONE-2 |
-| `PHONE_LINK` | `'.int-header-center-top a[href="tel:800-833-7132"]'` | ZONE-3 |
 | `CLEARANCE_LINK` | `'.int-header-center-top a[href*="clearance"]'` | ZONE-3 |
 | `BRANDS_LINK` | `'.int-header-center-top a[href*="/brands"]'` | ZONE-3 |
-| `DASHBOARD_LINK` | `'.int-header-center-top a[href*="sampledashboard"]'` | ZONE-3 |
-| `ORDERS_LINK` | `'.int-header-center-top a[href*="allorders"]'` | ZONE-3 |
-| `BUY_AGAIN_LINK` | `'.int-header-center-top a[href*="quickreorder"]'` | ZONE-3 |
-| `SEARCH_INPUT` | `'input.y-search__inp.int-header-search-input'` | ZONE-4 |
-| `SEARCH_BUTTON` | `'button.int-header-search-button'` | ZONE-4 |
-| `WISHLIST_BUTTON` | `'a.int-wishlist-button'` | ZONE-5 |
-| `WISHLIST_COUNT` | `'.int-wishlist-button-indicator'` | ZONE-5 |
-| `CART_MODAL` | `'.int-header-right .y-modal.is_cart'` | ZONE-5 |
-| `CART_CLOSE_BUTTON` | `'.int-header-right button.y-modal__btn-close'` | ZONE-5 |
-| `CART_TOTAL_ROWS` | `'.int-header-right .y-modal__cart-total--row'` | ZONE-5 |
-| `VIEW_CART_BUTTON` | `".int-header-right a.y-modal__cart-btn:has-text('View Cart')"` | ZONE-5 |
-| `CHECKOUT_BUTTON_MODAL` | `".int-header-right a.y-modal__cart-btn:has-text('Checkout')"` | ZONE-5 |
-| `CATEGORY_PILLS` | `'.int-header-categories .int-header-categories-pill'` | ZONE-6 |
-| `DENTAL_PILL` | `'.int-header-categories a[href*="general-dentistry"]'` | ZONE-6 |
-| `SURGERY_PILL` | `'.int-header-categories a[href*="surgical-and-implant"]'` | ZONE-6 |
-| `ORTHODONTIC_PILL` | `'.int-header-categories .int-header-categories-pill:last-child'` | ZONE-6 |
+| `DENTAL_LINK` | `'a.int-header-categories-pill[href*="general-dentistry"]'` | ZONE-3 |
+| `SURGERY_LINK` | `'a.int-header-categories-pill[href*="surgical"]'` | ZONE-3 |
+| `ORTHODONTIC_LINK` | `'a.int-header-categories-pill:nth-of-type(3)'` | ZONE-3 |
+| `SEARCH_INPUT` | `'input.y-search__inp.int-header-search-input'` | ZONE-3 |
+| `SEARCH_BUTTON` | `'button.int-header-search-button'` | ZONE-3 |
+| `WISHLIST_BUTTON` | `'a.int-wishlist-button'` | ZONE-4 |
+| `WISHLIST_COUNT` | `'.int-wishlist-button-indicator'` | ZONE-4 |
+| `CART_MODAL` | `'.int-header-right .y-modal.is_cart'` | ZONE-4 |
+| `ORDERS_LINK` | `'.int-header-right .y-modal.is_user a[href*="allorders"]'` | ZONE-4 |
+| `BUY_AGAIN_LINK` | `'.int-header-right .y-modal.is_user a[href*="quickreorder"]'` | ZONE-4 |
+| `CART_BUTTON` | `'button.int-cart-button.is_cart'` | ZONE-4 |
+| `LOGIN_BUTTON` | `'span:has-text("Login")'` | ZONE-4 |
+| `LOGOUT_BUTTON` | `'span:has-text("Logout")'` | ZONE-4 |
+| `REGISTER_BUTTON` | `'span:has-text("Register")'` | ZONE-4 |
+
+> **Note:** `WISHLIST_COUNT` and `CART_MODAL` are defined but currently have no active test coverage — reserved for CART-010..014.
 
 ---
 
@@ -341,8 +339,8 @@ Used via `page.evaluate()` for instant check and `page.wait_for_function()` for 
 
 - Debounce: 1000ms after typing stops.
 - Minimum 3 characters to trigger AJAX request.
-- Existing code uses `.type(text, delay=100)` — simulates human typing to trigger debounce.
-- New code uses `.fill()` (instant) for negative tests (SRCH-005).
+- All search input uses `.type(text, delay=100)` — simulates human typing to trigger the JS debounce event chain.
+- For the negative test (SRCH-005), `.type()` is also used so the debounce fires; then the test waits 2 s to confirm no dropdown appears.
 - Dropdown selector: `div.search_results_container`.
 
 ### 5.4 VIP Badge Count

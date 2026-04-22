@@ -193,10 +193,11 @@ def test_search_popup(page, setup_base_test):
 # ════════════════════════════════════════════════════════════════════════════
 
 def test_cart001_wishlist_button_visible(page, setup_base_test):
-    """CART-001: Wishlist button is visible"""
+    """CART-001: Wishlist button and count are visible"""
     _ = setup_base_test
     header = Header(page)
     header.verify_wishlist_button_visible()
+    header.verify_wishlist_count_visible()
 
 
 def test_cart002_wishlist_href_contains_wishlist(page, setup_base_test):
@@ -243,15 +244,15 @@ def test_cart006_my_account_href_contains_account_account(page, setup_logged_in_
     assert "account/logout" in header.get_logout_href()
 
 
-def test_cart006_cart_button_visible(page, setup_base_test):
-    """CART-006: Cart button is visible"""
+def test_cart007_cart_button_visible(page, setup_base_test):
+    """CART-007: Cart button is visible"""
     _ = setup_base_test
     header = Header(page)
     header.verify_cart_button_visible()
 
 
-def test_cart007_cart_count_badge_visible(page, setup_base_test):
-    """CART-007: Cart count badge is visible"""
+def test_cart008_cart_count_badge_visible(page, setup_base_test):
+    """CART-008: Cart count badge is visible"""
     _ = setup_base_test
     header = Header(page)
     header.verify_cart_count_badge_visible()
