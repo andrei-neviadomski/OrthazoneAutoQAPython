@@ -17,8 +17,7 @@ from components.header import Header
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# ZONE-1: Top Bar — new tests
-# Spec: TOP-001..019
+# ZONE-1: Top Bar
 # ════════════════════════════════════════════════════════════════════════════
 
 def test_top001_customer_counter_visible(page, setup_base_test):
@@ -116,8 +115,7 @@ def test_top015_phone_href_is_tel_link(page, setup_base_test):
     assert header.get_phone_href() == "tel:800-833-7132"
 
 # ════════════════════════════════════════════════════════════════════════════
-# ZONE-2: Logo & Slogan — new tests
-# Spec: LOGO-001..004
+# ZONE-2: Logo & Slogan
 # ════════════════════════════════════════════════════════════════════════════
 
 def test_logo001_slogan_visible(page, setup_base_test):
@@ -171,13 +169,6 @@ def test_srch002_search_button_visible(page, setup_base_test):
     header.verify_search_button_visible()
 
 
-def test_srch005_short_query_no_dropdown(page, setup_base_test):
-    """SRCH-005: Typing < 3 chars does NOT trigger the autocomplete dropdown"""
-    _ = setup_base_test
-    header = Header(page)
-    header.verify_short_query_no_dropdown("br")
-
-
 def test_search_popup(page, setup_base_test):
     """Test the search pop-up in the header"""
 
@@ -186,6 +177,13 @@ def test_search_popup(page, setup_base_test):
 
     header.input_data_search_field("12355")
     header.verify_search_popup("Articulating Paper 200 micron Strips Plastic Box Blue 300/Pk")
+
+
+def test_srch005_short_query_no_dropdown(page, setup_base_test):
+    """SRCH-005: Typing < 3 chars does NOT trigger the autocomplete dropdown"""
+    _ = setup_base_test
+    header = Header(page)
+    header.verify_short_query_no_dropdown("br")
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -220,7 +218,7 @@ def test_cart004_greeting_text_non_empty_when_logged_in(page, setup_logged_in_te
     greeting = header.get_account_greeting_text()
     assert len(greeting.strip()) > 0, f"Expected non-empty greeting, got: '{greeting}'"
 
-def test_cart005_my_account_link_visible_when_logged_in(page, setup_logged_in_test):
+def test_cart005_my_account_links_visible_when_logged_in(page, setup_logged_in_test):
     """CART-005 (AUTH): My Account links visible in dropdown after login (
     My Account, Your Orders, Bay again, Logout)"""
     _ = setup_logged_in_test
@@ -232,7 +230,7 @@ def test_cart005_my_account_link_visible_when_logged_in(page, setup_logged_in_te
     header.verify_buy_again_link_visible()
     header.verify_logout_link_visible()
 
-def test_cart006_my_account_href_contains_account_account(page, setup_logged_in_test):
+def test_cart006_my_account_hrefs_contains_account_account(page, setup_logged_in_test):
     """CART-006 (AUTH): My Account links href have needed urls (
     My Account, Your Orders, Bay again, Logout)"""
     _ = setup_logged_in_test

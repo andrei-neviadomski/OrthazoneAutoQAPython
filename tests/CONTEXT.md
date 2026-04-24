@@ -26,7 +26,7 @@ OrthazoneAutoQAPython/
 │   └── registration_page.py       ← Multi-step registration: email → phone → password → business → name → submit
 ├── tests/
 │   ├── conftest.py                ← All pytest fixtures + failure screenshot hook
-│   ├── test_header.py             ← 34 header tests (all zones; 10 more planned)
+│   ├── test_header.py             ← 34 header tests (all zones)
 │   ├── test_cart_popup_flow.py    ← 2 cart popup tests
 │   ├── test_checkout_flow.py      ← 1 checkout e2e test
 │   └── test_registration_on_reg_page.py  ← 1 registration e2e test
@@ -72,7 +72,6 @@ Auth:      ANON
 Setup:     Opens BASE_URL, verifies homepage title
 Teardown:  clear_cookies + localStorage.clear() + sessionStorage.clear()
 Yields:    HomePage
-Used by:   Most header tests, cart popup tests
 ```
 
 ### `setup_logged_in_test`
@@ -83,7 +82,6 @@ Auth:      AUTH (ADMIN_TEST_EMAIL / ADMIN_TEST_PASSWORD)
 Setup:     Opens BASE_URL → clicks Account → Login → fills creds → verifies homepage title
 Teardown:  clear_cookies + localStorage.clear() + sessionStorage.clear()
 Yields:    HomePage
-Used by:   CART-004, CART-005, CART-006
 ```
 
 ### `setup_cart_with_product`
@@ -95,7 +93,6 @@ Setup:     Opens BASE_URL → navigates to Metal Brackets Mini product page
            → selects MBT .018 / Hooks On 3 / Maxillary Right Canine (UR3) → clicks Add to Cart
 Teardown:  clear_cookies + localStorage.clear() + sessionStorage.clear()
 Yields:    HomePage
-Used by:   CART-010, CART-011, CART-012, CART-013, CART-014
 ```
 
 Product navigation path:
@@ -114,7 +111,6 @@ Teardown:  clear_cookies + localStorage.clear()
            → Admin login → delete orders for ADMIN_TEST_EMAIL
            → Admin panel → delete customer with ADMIN_NEW_EMAIL
 Yields:    HomePage
-Used by:   CHK-001 (test_checkout_flow), REG-001 (test_reg_on_reg_page)
 ```
 
 > Note: `setup_order_test` performs admin cleanup **after** `clear_cookies` in teardown. This works because the admin login is a separate navigation step that establishes a fresh session.
@@ -123,17 +119,6 @@ Used by:   CHK-001 (test_checkout_flow), REG-001 (test_reg_on_reg_page)
 
 ## 4. Page Objects Reference
 
-### `BasePage`
-
-| Method | Signature | Notes |
-|--------|-----------|-------|
-| `open` | `open(url: str)` | `goto(url, wait_until="domcontentloaded", timeout=60000)` |
-| `click` | `click(selector: str)` | `page.click(selector)` |
-| `fill` | `fill(selector: str, text: str)` | `page.fill(selector, text)` |
-| `get_text` | `get_text(selector: str) -> str` | `page.inner_text(selector)` |
-| `take_screenshot` | `take_screenshot(name: str)` | Saves to `screenshots/` with timestamp |
-
----
 
 ### `HomePage`
 
@@ -236,54 +221,6 @@ Multi-step registration flow. Steps called in order:
 
 ---
 
-### `Header` (component)
-
-All selectors are class constants. Methods grouped by zone.
-
-#### Selector constants
-
-| Constant | Value | Zone |
-|----------|-------|------|
-| `CUSTOMER_COUNTER` | `'.int-header-top-counter'` | ZONE-1 |
-| `COUNTER_DIGIT_SPANS` | `'.int-header-top-counter span'` | ZONE-1 |
-| `SHOPPING_PLUS_LINK` | `'a.int-header-top-right-link.is_current'` | ZONE-1 |
-| `INVENTORY_LINK` | `'a.int-header-top-right-link[href*="drstorelist"]'` | ZONE-1 |
-| `DASHBOARD_LINK` | `'.int-header-top-right a[href*="sampledashboard"]'` | ZONE-1 |
-| `PAYMENT_LINK` | `'a.int-header-top-right-link[href*="drslider"]'` | ZONE-1 |
-| `LAB_TRACKER_LINK` | `'a.int-header-top-right-link[href*="account/lab"]'` | ZONE-1 |
-| `VIP_BADGES` | `'a.int-header-top-right-link:not(.is_current) .int-header-top-badge:text("VIP")'` | ZONE-1 |
-| `FREE_BADGES` | `'a.int-header-top-right-link .int-header-top-badge:text("Free")'` | ZONE-1 |
-| `ACCOUNT_MODAL_DESKTOP` | `'.int-header-top-right-account .y-modal.is_user'` | ZONE-1 |
-| `ACCOUNT_BUTTON_DESKTOP` | `'button.int-account-button'` | ZONE-1 |
-| `MY_ACCOUNT_LINK` | `'.int-header-top-right-account a[href*="account/account"]'` | ZONE-1 |
-| `LOGOUT_LINK_DESKTOP` | `'.int-header-top-right-account a[href*="account/logout"]'` | ZONE-1 |
-| `ACCOUNT_GREETING` | `'.int-account-button-text span:first-child'` | ZONE-1 |
-| `PHONE_LINK` | `'a.int-header-center-top-call[href="tel:800-833-7132"]'` | ZONE-1 |
-| `SLOGAN` | `'p.int-header-left-serving'` | ZONE-2 |
-| `SLOGAN_TEXT` | `"Serving the Dental Professionals Since 2015"` | ZONE-2 |
-| `MAIN_LOGO_LINK` | `'.int-header-left a[href="/"]'` | ZONE-2 |
-| `MAIN_LOGO_IMG` | `'.int-header-left img[alt="logo"]'` | ZONE-2 |
-| `AAO_LOGO_IMG` | `'.int-header-left img[alt="aao"]'` | ZONE-2 |
-| `CLEARANCE_LINK` | `'.int-header-center-top a[href*="clearance"]'` | ZONE-3 |
-| `BRANDS_LINK` | `'.int-header-center-top a[href*="/brands"]'` | ZONE-3 |
-| `DENTAL_LINK` | `'a.int-header-categories-pill[href*="general-dentistry"]'` | ZONE-3 |
-| `SURGERY_LINK` | `'a.int-header-categories-pill[href*="surgical"]'` | ZONE-3 |
-| `ORTHODONTIC_LINK` | `'a.int-header-categories-pill:nth-of-type(3)'` | ZONE-3 |
-| `SEARCH_INPUT` | `'input.y-search__inp.int-header-search-input'` | ZONE-3 |
-| `SEARCH_BUTTON` | `'button.int-header-search-button'` | ZONE-3 |
-| `WISHLIST_BUTTON` | `'a.int-wishlist-button'` | ZONE-4 |
-| `WISHLIST_COUNT` | `'.int-wishlist-button-indicator'` | ZONE-4 |
-| `CART_MODAL` | `'.int-header-right .y-modal.is_cart'` | ZONE-4 |
-| `ORDERS_LINK` | `'.int-header-right .y-modal.is_user a[href*="allorders"]'` | ZONE-4 |
-| `BUY_AGAIN_LINK` | `'.int-header-right .y-modal.is_user a[href*="quickreorder"]'` | ZONE-4 |
-| `CART_BUTTON` | `'button.int-cart-button.is_cart'` | ZONE-4 |
-| `LOGIN_BUTTON` | `'span:has-text("Login")'` | ZONE-4 |
-| `LOGOUT_BUTTON` | `'span:has-text("Logout")'` | ZONE-4 |
-| `REGISTER_BUTTON` | `'span:has-text("Register")'` | ZONE-4 |
-
-> **Note:** `WISHLIST_COUNT` and `CART_MODAL` are defined but currently have no active test coverage — reserved for CART-010..014.
-
----
 
 ## 5. Known Quirks
 
@@ -313,29 +250,7 @@ self.page.locator(".int-header-center-top a[href='tel:800-833-7132']")
 
 Do NOT use `.nth(0)` — element order in DOM is not guaranteed.
 
-### 5.2 Cart Modal (Journal2 animation)
-
-The cart modal stays `display:block` at all times. Playwright's `is_visible()` and `wait_for(state="hidden")` do not work.
-
-**Confirmed non-working approaches (from 2 test runs):**
-- `is_visible()` — always `True`
-- `wait_for(state="hidden")` — never fires
-- `getBoundingClientRect()` — modal rect does not change between open and closed
-
-**Root cause:** Journal2 uses `pointer-events: none` (closed) / `pointer-events: auto` (open).
-
-**Working approach:**
-```python
-# Open check:
-window.getComputedStyle(el).pointerEvents !== 'none'
-
-# Closed check:
-window.getComputedStyle(el).pointerEvents === 'none'
-```
-
-Used via `page.evaluate()` for instant check and `page.wait_for_function()` for waiting.
-
-### 5.3 Search Autocomplete
+### 5.2 Search Autocomplete
 
 - Debounce: 1000ms after typing stops.
 - Minimum 3 characters to trigger AJAX request.
@@ -343,22 +258,18 @@ Used via `page.evaluate()` for instant check and `page.wait_for_function()` for 
 - For the negative test (SRCH-005), `.type()` is also used so the debounce fires; then the test waits 2 s to confirm no dropdown appears.
 - Dropdown selector: `div.search_results_container`.
 
-### 5.4 VIP Badge Count
+### 5.3 VIP Badge Count
 
 `Shopping+` link (`.is_current`) also has a badge element. The `VIP_BADGES` selector explicitly excludes it with `:not(.is_current)` to keep the count at 3.
 
-### 5.5 Orthodontic Category Pill
-
-Has `href=""` — links back to the current page. Test visibility only; do not test navigation.
-
-### 5.6 Checkout Test Requirements
+### 5.4 Checkout Test Requirements
 
 - Must call `set_stripe_cookie()` before navigating to checkout (enables test mode).
 - Stripe iframe fields use `frame_locator` — they cannot be filled with standard `fill()`.
 - Signature step requires mouse events (`mouse.move` + `mouse.down` + `mouse.up`).
 - `setup_order_test` cleans up created orders and the new registered customer in teardown.
 
-### 5.7 Registration Page — JS-driven steps
+### 5.5 Registration Page — JS-driven steps
 
 The business account type selection uses jQuery triggers (not a simple click):
 ```python

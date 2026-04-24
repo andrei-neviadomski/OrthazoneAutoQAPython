@@ -27,8 +27,7 @@ test_{area}{NNN}_{description}
 | `logo` | Header — Logo & Slogan | `test_header.py` |
 | `nav` | Header — Navigation | `test_header.py` |
 | `srch` | Header — Search | `test_header.py` |
-| `cart` | Header — Cart, Wishlist & Account widget | `test_header.py` |
-| `cat` | Header — Category Pills | `test_header.py` |
+| `cart` | Header — Wishlist & Cart | `test_header.py` |
 | `cpop` | Cart Popup Flow (add/remove product) | `test_cart_popup_flow.py` |
 | `chk` | Checkout Flow | `test_checkout_flow.py` |
 | `reg` | Registration | `test_registration_on_reg_page.py` |
@@ -38,7 +37,6 @@ test_{area}{NNN}_{description}
 - All letters in the function name are **lowercase** — no `CamelCase`, no `UPPERCASE`.
 - The spec ID in the **docstring** keeps uppercase for readability: `"""TOP-001: ..."""`.
 - Numbers are gapless within an area. When a test is deleted, its number is retired (not reused).
-- Tests covering multiple spec rows in one function use a range: `test_nav002_to_nav006_nav_links_visible`.
 
 ### Legacy tests
 
@@ -93,7 +91,7 @@ They are left unchanged to preserve git history, but their proposed canonical na
 | TOP-013 | `test_top013_dashboard_link_visible` | Dashboard link is visible | ANON | `setup_base_test` |
 | TOP-014 | `test_top014_phone_link_visible` | Phone link visible, contains `(800) 833-7132` | ANON | `setup_base_test` |
 | TOP-015 | `test_top015_phone_href_is_tel_link` | Phone href equals `tel:800-833-7132` | ANON | `setup_base_test` |
-| TOP-016 | *(legacy: `test_check_login_logout`)* | Login → verify home → Logout → verify logout page | ANON | `setup_base_test` |
+
 
 ---
 
@@ -108,30 +106,20 @@ They are left unchanged to preserve git history, but their proposed canonical na
 
 ---
 
-#### ZONE-3: Navigation
+#### ZONE-3: Navigation & Search
 
 | ID | Test function | Scenario | Auth | Fixture |
 |----|---------------|----------|------|---------|
 | NAV-001 | `test_nav001_nav_links_visible` | Clearance, Brands, Dental, Surgery, Orthodontic are visible | ANON | `setup_base_test` |
-
----
-
-#### ZONE-4: Search
-
-| ID | Test function | Scenario | Auth | Fixture |
-|----|---------------|----------|------|---------|
 | SRCH-001 | `test_srch001_search_input_visible` | Search input field is visible | ANON | `setup_base_test` |
 | SRCH-002 | `test_srch002_search_button_visible` | Search button is visible | ANON | `setup_base_test` |
 | SRCH-003 | *(legacy: `test_search_popup`)* | Type ≥ 3 chars → product dropdown appears | ANON | `setup_base_test` |
 | SRCH-005 | `test_srch005_short_query_no_dropdown` | Type < 3 chars → dropdown does NOT appear | ANON | `setup_base_test` |
 
-> SRCH-004 is retired (covered by legacy `test_search_popup`).
 
 ---
 
-#### ZONE-5: Cart, Wishlist & Account
-
-> ⚠️ **Known numbering bug:** two functions share the `cart006` prefix — `test_cart006_my_account_href_contains_account_account` (AUTH) and `test_cart006_cart_button_visible` (ANON). Both run because full names are unique, but the second should be renamed to `test_cart007_cart_button_visible`; the existing `test_cart007_cart_count_badge_visible` should become `test_cart008_cart_count_badge_visible`.
+#### ZONE-4: Wishlist & Cart
 
 | ID | Test function | Scenario | Auth | Fixture |
 |----|---------------|----------|------|---------|
@@ -141,24 +129,11 @@ They are left unchanged to preserve git history, but their proposed canonical na
 | CART-004 | `test_cart004_greeting_text_non_empty_when_logged_in` | Greeting text is non-empty when logged in | AUTH | `setup_logged_in_test` |
 | CART-005 | `test_cart005_my_account_link_visible_when_logged_in` | My Account, Your Orders, Buy Again, Logout links visible in dropdown | AUTH | `setup_logged_in_test` |
 | CART-006 | `test_cart006_my_account_href_contains_account_account` | My Account, Orders, Buy Again, Logout hrefs contain expected paths | AUTH | `setup_logged_in_test` |
-| CART-007 | `test_cart006_cart_button_visible` *(rename pending)* | Cart button is visible | ANON | `setup_base_test` |
-| CART-008 | `test_cart007_cart_count_badge_visible` *(rename pending)* | Cart count badge is visible | ANON | `setup_base_test` |
+| CART-007 | `test_cart007_cart_button_visible` *(rename pending)* | Cart button is visible | ANON | `setup_base_test` |
+| CART-008 | `test_cart008_cart_count_badge_visible` *(rename pending)* | Cart count badge is visible | ANON | `setup_base_test` |
 | CART-009 | *(legacy: `test_cart_counter`)* | Cart counter > 0 after adding product | ANON | `setup_base_test` |
-| CART-010 | `test_cart010_cart_modal_shows_subtotal` *(not yet implemented)* | Cart modal shows Sub-Total row | ANON | `setup_cart_with_product` |
-| CART-011 | `test_cart011_cart_modal_shows_total` *(not yet implemented)* | Cart modal shows Total row (exact match) | ANON | `setup_cart_with_product` |
-| CART-012 | `test_cart012_view_cart_href` *(not yet implemented)* | View Cart href contains `checkout/cart` | ANON | `setup_cart_with_product` |
-| CART-013 | `test_cart013_checkout_button_href` *(not yet implemented)* | Checkout href contains `check-out` | ANON | `setup_cart_with_product` |
-| CART-014 | `test_cart014_close_button_hides_modal` *(not yet implemented)* | Close button hides cart modal | ANON | `setup_cart_with_product` |
+| CART-010 | *(legacy: `test_check_login_logout`)* | Login → verify home → Logout → verify logout page | ANON | `setup_base_test` |
 
----
-
-#### ZONE-6: Category Pills *(not yet implemented)*
-
-| ID | Test function | Scenario | Auth | Fixture |
-|----|---------------|----------|------|---------|
-| CAT-001..003 | `test_cat001_to_cat003_all_pills_visible` | Dental, Surgery, Orthodontic pills are visible | ANON | `setup_base_test` |
-| CAT-004 | `test_cat004_dental_pill_href` | Dental pill href contains `general-dentistry` | ANON | `setup_base_test` |
-| CAT-005 | `test_cat005_surgery_pill_href` | Surgery pill href contains `surgical` | ANON | `setup_base_test` |
 
 ---
 
@@ -166,10 +141,8 @@ They are left unchanged to preserve git history, but their proposed canonical na
 
 | ID | Test function | Scenario | Auth | Fixture |
 |----|---------------|----------|------|---------|
-| CPOP-001 | `test_add_product_to_cart_popup` | Add product → open cart modal → product name visible | ANON | `setup_base_test` |
-| CPOP-002 | `test_remove_product_from_cart_popup` | Add product → open cart modal → remove → empty cart message | ANON | `setup_base_test` |
-
-> Proposed canonical names: `test_cpop001_product_appears_in_cart_modal`, `test_cpop002_product_removed_from_cart_modal`.
+| CPOP-001 | *(legacy: `test_add_product_to_cart_popup`)* | Add product → open cart modal → product name visible | ANON | `setup_base_test` |
+| CPOP-002 | *(legacy: `test_remove_product_from_cart_popup`)* | Add product → open cart modal → remove → empty cart message | ANON | `setup_base_test` |
 
 ---
 
@@ -179,9 +152,6 @@ They are left unchanged to preserve git history, but their proposed canonical na
 |----|---------------|----------|------|---------|
 | CHK-001 | `test_checkout_flow` | Login → add product → cart modal → checkout → fill payment → sign → success page | AUTH\* | `setup_order_test` |
 
-> Proposed canonical name: `test_chk001_full_checkout_flow`.
-> \* Login happens inside the test body, not in the fixture.
-
 ---
 
 ### 3.4 `test_registration_on_reg_page.py` — Registration
@@ -190,21 +160,17 @@ They are left unchanged to preserve git history, but their proposed canonical na
 |----|---------------|----------|------|---------|
 | REG-001 | `test_reg_on_reg_page` | Open registration → fill all steps → verify account created | ANON | `setup_order_test` |
 
-> Proposed canonical name: `test_reg001_business_account_registration`.
-
 ---
 
 ## 4. Test Count Summary
 
-| Area | Implemented | Planned (not yet implemented) |
-|------|-------------|-------------------------------|
-| Header TOP (ZONE-1) | 16 (15 + 1 legacy) | — |
-| Header LOGO (ZONE-2) | 4 | — |
-| Header NAV (ZONE-3) | 1 | — |
-| Header SRCH (ZONE-4) | 4 (3 + 1 legacy) | — |
-| Header CART (ZONE-5) | 9 (6 + 3 legacy/pending rename) | 5 (CART-010..014) |
-| Header CAT (ZONE-6) | 0 | 5 (CAT-001..005) |
-| Cart Popup Flow | 2 | — |
-| Checkout | 1 | — |
-| Registration | 1 | — |
-| **Total** | **38** | **10** |
+| Area | Implemented |
+|------|-------------|
+| Header TOP (ZONE-1) | 15 |
+| Header LOGO (ZONE-2) | 4 |
+| Header NAV+SRCH (ZONE-3) | 5 |
+| Header CART (ZONE-4) | 10 | 
+| Cart Popup Flow | 2 |
+| Checkout | 1 |
+| Registration | 1 | 
+| **Total** | **38** |
