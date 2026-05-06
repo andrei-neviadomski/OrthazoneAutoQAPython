@@ -5,16 +5,6 @@ from pages.category_page import CategoryPage
 from pages.product_page import ProductPage
 from components.header import Header
 
-# ════════════════════════════════════════════════════════════════════════════
-# Existing tests (DO NOT change)
-# ════════════════════════════════════════════════════════════════════════════
-
-
-
-
-
-
-
 
 # ════════════════════════════════════════════════════════════════════════════
 # ZONE-1: Top Bar

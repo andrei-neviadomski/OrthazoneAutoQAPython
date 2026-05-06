@@ -235,6 +235,7 @@ class Header(BasePage):
 
     def click_account_button_desktop(self):
         """ZONE-4: Click account button (desktop) and wait for dropdown animation"""
+        self.page.wait_for_load_state("domcontentloaded")
         btn = self.page.locator(self.ACCOUNT_BUTTON_DESKTOP).filter(visible=True).first
         btn.click()
         self.page.wait_for_selector(self.ACCOUNT_MODAL_DESKTOP, state="visible")
