@@ -12,6 +12,14 @@ from admin.admin_login_page import AdminLoginPage
 
 load_dotenv()
 
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):  # pylint: disable=redefined-outer-name
+    """Set default browser viewport to 1920x1080 for all tests."""
+    return {
+        **browser_context_args,
+        "viewport": {"width": 1920, "height": 1080},
+    }
+
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     """Setup a screenshot when a test failed"""
